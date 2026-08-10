@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Viper 8000 Radio Trainer — Proof of Concept</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Viper 8000 Radio Trainer</h1>
+    <p>Proof of concept — click any control to highlight it, click again to unhighlight.</p>
+  </header>
+
+  <main class="radio-stage">
+    <!-- viewBox and hotspot geometry sourced from viperFrontMap.svg -->
+    <svg id="radioMap" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2086 3508">
+      <defs>
+        <style>
+          .cls-1 {
+            fill: #fff;
+            stroke: #000;
+            stroke-miterlimit: 10;
+          }
+        </style>
+      </defs>
+      <g id="background">
+        <image width="2086" height="3508" xlink:href="viper front3.png" />
+      </g>
+      <g id="InteractiveElements">
+        <rect id="radioScreen" class="cls-1" x="835.29" y="1417.88" width="418.24" height="416.41"/>
+        <path id="one" class="cls-1" d="M827.95,2281.88h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
+        <path id="four" class="cls-1" d="M831.62,2393.78h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
+        <path id="seven" class="cls-1" d="M831.62,2503.84h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
+        <path id="star" class="cls-1" d="M828.87,2611.15h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
+        <path id="three" class="cls-1" d="M1147.13,2287.38h104.1c18.98,0,34.39,15.41,34.39,34.39h0c0,21.01-17.06,38.06-38.06,38.06h-100.43v-72.46h0Z"/>
+        <path id="six" class="cls-1" d="M1149.43,2395.61h104.1c18.98,0,34.39,15.41,34.39,34.39h0c0,21.01-17.06,38.06-38.06,38.06h-100.43v-72.46h0Z"/>
+        <path id="nine" class="cls-1" d="M1146.68,2505.68h104.1c18.98,0,34.39,15.41,34.39,34.39h0c0,21.01-17.06,38.06-38.06,38.06h-100.43v-72.46h0Z"/>
+        <path id="pound" class="cls-1" d="M1146.68,2615.74h104.1c18.98,0,34.39,15.41,34.39,34.39h0c0,21.01-17.06,38.06-38.06,38.06h-100.43v-72.46h0Z"/>
+        <rect id="two" class="cls-1" x="971.95" y="2284.63" width="142.17" height="77.96"/>
+        <rect id="eight" class="cls-1" x="974.7" y="2505.68" width="138.5" height="76.13"/>
+        <rect id="five" class="cls-1" x="973.78" y="2396.53" width="137.58" height="74.29"/>
+        <rect id="zero" class="cls-1" x="974.7" y="2614.82" width="134.83" height="73.38"/>
+        <polygon id="downNavigation" class="cls-1" points="1043.95 2142.47 1171.9 2049.83 916 2049.83 1043.95 2142.47"/>
+        <polygon id="upNavigation" class="cls-1" points="1044.87 2142.47 921.5 2231.43 1168.23 2231.43 1044.87 2142.47"/>
+        <polygon id="leftNavigation" class="cls-1" points="1043.95 2140.56 917.83 2052.43 917.83 2228.68 1043.95 2140.56"/>
+        <polygon id="rightNavigation" class="cls-1" points="1048.4 2140.63 1168.23 2231.43 1168.23 2049.83 1048.4 2140.63"/>
+        <path id="home" class="cls-1" d="M836.2,2045.24h45.86v186.19h-35.31c-24.05,0-43.57-19.52-43.57-43.57v-109.61c0-18.22,14.8-33.02,33.02-33.02Z"/>
+        <path id="data" class="cls-1" d="M1249.4,2047.54h35.31v186.19h-45.86c-18.22,0-33.02-14.8-33.02-33.02v-109.61c0-24.05,19.52-43.57,43.57-43.57Z" transform="translate(2490.55 4281.26) rotate(-180)"/>
+        <path id="menuSelectOne" class="cls-1" d="M850.88,1924.17h101.81v80.71h-91.26c-16.96,0-30.73-13.77-30.73-30.73v-29.81c0-11.14,9.04-20.18,20.18-20.18Z"/>
+        <path id="menuSelectThree" class="cls-1" d="M1163.64,1926.92h91.26v80.71h-101.81c-11.14,0-20.18-9.04-20.18-20.18v-29.81c0-16.96,13.77-30.73,30.73-30.73Z" transform="translate(2387.82 3934.56) rotate(-180)"/>
+        <rect id="menuSelectTwo" class="cls-1" x="985.71" y="1928.76" width="119.24" height="77.04"/>
+        <rect id="topOrangeButton" class="cls-1" x="706.88" y="834.54" width="197.2" height="27.52"/>
+        <path id="sixteenPositionKnobClockwise" class="cls-1" d="M1064.59,808.86h-123.82l10.09-260.48c0-48.38,43.34-90.8,91.72-90.8l20.16-.54"/>
+        <path id="sixteenPositionKnobCounterClockwise" class="cls-1" d="M1062.74,457.03l13.77-.37c50.38-5.63,100.89,34.6,100.89,85.3l4.59,266.9h-117.4"/>
+        <rect id="threePositionABCSwitch" class="cls-1" x="1202.17" y="872.15" width="146.75" height="102.73"/>
+        <polyline id="onOffVolumeClockwise" class="cls-1" points="1479.94 880.93 1353.83 848.8 1403.43 654.16 1529.74 686.34"/>
+        <polyline id="onOffVolumeCounterClockwise" class="cls-1" points="1529.74 686.34 1655.85 718.47 1606.25 913.12 1479.94 880.93"/>
+        <ellipse id="pttButton" class="cls-1" cx="1450.73" cy="1808.61" rx="50.45" ry="207.29"/>
+        <ellipse id="topSideSellectButton" class="cls-1" cx="1454.39" cy="1503.18" rx="31.18" ry="68.79"/>
+        <path id="sideButton1" class="cls-1" d="M1414.96,2110.36h19.26c12.66,0,22.93,10.27,22.93,22.93v51.82c0,14.43-11.71,26.14-26.14,26.14h-16.05v-100.89h0Z"/>
+        <path id="sideButton2" class="cls-1" d="M1416.79,2247.94h19.26c12.66,0,22.93,10.27,22.93,22.93v51.82c0,14.43-11.71,26.14-26.14,26.14h-16.05v-100.89h0Z"/>
+        <ellipse id="batteryLatchLeft" class="cls-1" cx="671.11" cy="2832.2" rx="27.52" ry="77.04"/>
+        <ellipse id="batteryLatchRight" class="cls-1" cx="1429.63" cy="2830.36" rx="27.52" ry="77.04"/>
+        <ellipse id="microphone" class="cls-1" cx="894.45" cy="1271.59" rx="57.32" ry="25.22"/>
+      </g>
+    </svg>
+  </main>
+
+  <aside class="sidebar">
+    <div class="card">
+      <h2>Session</h2>
+      <div class="stat-row">
+        <span class="stat-value" id="activeCount">0</span>
+        <span class="stat-label">controls highlighted</span>
+      </div>
+      <button id="resetBtn" type="button">Reset All</button>
+    </div>
+
+    <div class="card" id="pttCard">
+      <h2>Push-to-Talk</h2>
+      <div class="ptt-status-row">
+        <span class="ptt-dot" id="pttDot"></span>
+        <span id="pttStatusText">Idle — hold the PTT button to transmit.</span>
+      </div>
+      <p class="ptt-hint">
+        Press and hold the PTT bar on the side of the radio. Wait for the
+        confirmation beep, pause briefly, then speak. Pause about half a
+        second before you release — the radio (and this simulator) clips
+        the last bit of every transmission.
+      </p>
+    </div>
+
+    <div class="card log-card">
+      <h2>Activity Log</h2>
+      <ul id="logList"></ul>
+    </div>
+  </aside>
+</div>
+
+<div id="tooltip"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
