@@ -6,6 +6,7 @@ import { initTooltip } from "./ui/tooltip.js";
 import { initActivityLog } from "./ui/activityLog.js";
 import { initHotspotHighlight } from "./ui/hotspotHighlight.js";
 import { initScreenView } from "./radio/screenView.js";
+import { instantiateLcdScreen } from "./radio/lcdTemplate.js";
 import { initVolumeKnobInput } from "./radio/volumeKnobInput.js";
 import { createPTTController, primeMicPermission } from "./ptt/pttController.js";
 import { initPTTView } from "./ptt/pttView.js";
@@ -31,12 +32,17 @@ document.addEventListener("DOMContentLoaded", () => {
     resetBtn: document.getElementById("resetBtn"),
   });
 
-  // ---- Radio power/volume + LCD screen ----
+  // ---- Radio power/volume + LCD screen(s) ----
+  // Two instances of the same template: the real on-radio screen, and the
+  // larger auxiliary panel next to it. Both stay in sync automatically
+  // since screenView.js updates everything in `screens` together.
+  const screens = [
+    instantiateLcdScreen(document.getElementById("lcdScreenHost")),
+    instantiateLcdScreen(document.getElementById("lcdScreenLargeHost")),
+  ];
+
   initScreenView({
-    lcdScreen: document.getElementById("lcdScreen"),
-    timeDisplay: document.getElementById("timeDisplay"),
-    volumeHud: document.getElementById("volumeHud"),
-    volumeHudBars: document.getElementById("volumeHudBars"),
+    screens,
     radioPowerDot: document.getElementById("radioPowerDot"),
     radioPowerText: document.getElementById("radioPowerText"),
     volumeBarsSidebar: document.getElementById("volumeBarsSidebar"),
