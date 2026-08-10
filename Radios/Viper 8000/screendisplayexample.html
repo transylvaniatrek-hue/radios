@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APX 8000HXE Radio Display</title>
+    <style>
+        /* Import a pixelated font for authenticity */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            margin: 0;
+        }
+
+        .radio-screen {
+            width: 300px; /* Scaled up from 130x130 for visibility */
+            height: 300px;
+            background-color: #1a56ff; /* Classic LCD blue */
+            /* Scanline effect to mimic the LCD pixel grid */
+            background-image: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.2),
+                rgba(0, 0, 0, 0.2) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            font-family: 'VT323', monospace;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            border: 8px solid #111;
+            border-radius: 4px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* --- ZONE 1: Status Icons --- */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px 0 10px;
+            font-size: 20px;
+            font-weight: bold;
+            height: 30px;
+        }
+        
+        .icon-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* --- ZONE 2: Time --- */
+        .time-display {
+            padding-left: 10px;
+            font-size: 28px;
+            margin-top: -5px;
+        }
+
+        /* --- ZONE 3: Main Text Entries --- */
+        .main-text-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .main-text-line {
+            font-size: 38px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            /* Text shadow to mimic the LCD pixel bleed */
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3); 
+        }
+
+        /* --- ZONE 4: Menu Select Buttons --- */
+        .menu-bar {
+            display: flex;
+            border-top: 2px solid #000;
+            height: 40px;
+            background-color: rgba(26, 86, 255, 0.8);
+        }
+
+        .menu-item {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .menu-item:not(:last-child) {
+            border-right: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="radio-screen" id="radioDisplay">
+        
+        <!-- Zone 1: Status Icons -->
+        <div class="status-bar">
+            <div class="icon-group">
+                <span id="icon-rssi">Tıll</span> <!-- Signal -->
+            </div>
+            <div class="icon-group">
+                <span id="icon-scan">Z</span>
+                <span id="icon-power">H</span>
+                <span id="icon-gps">✈</span> <!-- Using plane/satellite proxy -->
+            </div>
+            <div class="icon-group">
+                <span id="icon-battery">🔋</span>
+            </div>
+        </div>
+
+        <!-- Zone 2: Time -->
+        <div class="time-display" id="timeDisplay">20:35</div>
+
+        <!-- Zone 3: Main Text -->
+        <div class="main-text-area">
+            <div class="main-text-line" id="line1">TC Viper</div>
+            <div class="main-text-line" id="line2">TAC 1</div>
+            <div class="main-text-line" id="line3">Employee</div>
+        </div>
+
+        <!-- Zone 4: Menu Select Softkeys -->
+        <div class="menu-bar">
+            <div class="menu-item" id="menu1">Mute</div>
+            <div class="menu-item" id="menu2">Clck</div>
+            <div class="menu-item" id="menu3">Zone</div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript to easily update the screen dynamically -->
+    <script>
+        // Function to update the screen content
+        function updateScreen(data) {
+            if(data.time) document.getElementById('timeDisplay').innerText = data.time;
+            
+            if(data.line1) document.getElementById('line1').innerText = data.line1;
+            if(data.line2) document.getElementById('line2').innerText = data.line2;
+            if(data.line3) document.getElementById('line3').innerText = data.line3;
+            
+            if(data.menu1) document.getElementById('menu1').innerText = data.menu1;
+            if(data.menu2) document.getElementById('menu2').innerText = data.menu2;
+            if(data.menu3) document.getElementById('menu3').innerText = data.menu3;
+        }
+
+        // Example of how to change the screen dynamically:
+        /*
+        updateScreen({
+            time: "14:00",
+            line1: "Fire Dept",
+            line2: "DISPATCH",
+            line3: "Active",
+            menu1: "Scan",
+            menu2: "Nuis",
+            menu3: "Page"
+        });
+        */
+    </script>
+</body>
+</html>
