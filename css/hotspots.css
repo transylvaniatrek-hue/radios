@@ -1,0 +1,208 @@
+/* Interactive control states: the SVG hotspot base/hover/active look, the
+   PTT hold-to-transmit glow, the momentary knob-click flash, and the
+   sidebar status widgets tied to those same features (PTT card, Radio
+   card). Kept together because they're all styling the same underlying
+   feature modules (ui/hotspotHighlight.js, ptt/pttView.js,
+   radio/screenView.js). The LCD display itself lives in screen.css. */
+
+#InteractiveElements > * {
+  fill: rgba(255, 255, 255, 0.001);
+  stroke: transparent;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.15s ease, stroke 0.15s ease, filter 0.15s ease;
+  vector-effect: non-scaling-stroke;
+}
+
+#InteractiveElements > *:hover {
+  fill: var(--hover);
+  stroke: var(--hover-stroke);
+}
+
+#InteractiveElements > *:focus {
+  outline: none;
+  fill: var(--hover);
+  stroke: var(--hover-stroke);
+}
+
+#InteractiveElements > *.active {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px var(--accent-soft));
+}
+
+#InteractiveElements > *.active:hover {
+  fill: rgba(255, 138, 0, 0.7);
+}
+
+/* ---- PTT hold-to-transmit phases ---- */
+@keyframes pttPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+#InteractiveElements > *.ptt-acquiring {
+  fill: rgba(255, 179, 0, 0.5);
+  stroke: #ffb300;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px rgba(255, 179, 0, 0.6));
+  animation: pttPulse 0.9s ease-in-out infinite;
+}
+
+#InteractiveElements > *.ptt-keying {
+  fill: rgba(41, 182, 246, 0.5);
+  stroke: #29b6f6;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px rgba(41, 182, 246, 0.6));
+}
+
+#InteractiveElements > *.ptt-recording {
+  fill: rgba(255, 59, 48, 0.55);
+  stroke: #ff3b30;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 18px rgba(255, 59, 48, 0.75));
+  animation: pttPulse 0.6s ease-in-out infinite;
+}
+
+#InteractiveElements > *.ptt-processing {
+  fill: rgba(149, 117, 205, 0.5);
+  stroke: #9575cd;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px rgba(149, 117, 205, 0.6));
+}
+
+#InteractiveElements > *.ptt-playing {
+  fill: rgba(52, 199, 89, 0.5);
+  stroke: #34c759;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px rgba(52, 199, 89, 0.6));
+  animation: pttPulse 0.8s ease-in-out infinite;
+}
+
+/* ---- Knob click flash (momentary, not a persistent toggle) ---- */
+@keyframes knobFlash {
+  0% {
+    fill: rgba(255, 179, 0, 0.65);
+    stroke: #ffb300;
+  }
+  100% {
+    fill: rgba(255, 255, 255, 0.001);
+    stroke: transparent;
+  }
+}
+
+#InteractiveElements > *.knob-flash {
+  animation: knobFlash 0.35s ease-out;
+}
+
+/* ---- Sidebar: Push-to-Talk card ---- */
+.ptt-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.ptt-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ptt-dot.ptt-acquiring {
+  background: #ffb300;
+  box-shadow: 0 0 8px #ffb300;
+  animation: pttPulse 0.9s ease-in-out infinite;
+}
+
+.ptt-dot.ptt-keying {
+  background: #29b6f6;
+  box-shadow: 0 0 8px #29b6f6;
+}
+
+.ptt-dot.ptt-recording {
+  background: #ff3b30;
+  box-shadow: 0 0 8px #ff3b30;
+  animation: pttPulse 0.6s ease-in-out infinite;
+}
+
+.ptt-dot.ptt-processing {
+  background: #9575cd;
+  box-shadow: 0 0 8px #9575cd;
+}
+
+.ptt-dot.ptt-playing {
+  background: #34c759;
+  box-shadow: 0 0 8px #34c759;
+  animation: pttPulse 0.8s ease-in-out infinite;
+}
+
+.ptt-hint {
+  margin-top: 10px !important;
+  color: var(--muted) !important;
+  font-size: 0.82rem !important;
+}
+
+.log-state.ptt {
+  color: #29b6f6;
+}
+
+.log-state.radio {
+  color: #ffb300;
+}
+
+/* ---- Sidebar: Radio card ---- */
+.radio-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.radio-power-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.radio-power-dot.on {
+  background: #34c759;
+  box-shadow: 0 0 8px #34c759;
+}
+
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.volume-bars-sidebar {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  height: 12px;
+}
+
+.volume-bars-sidebar .seg {
+  flex: 1;
+  background: #333;
+  border-radius: 1px;
+}
+
+.volume-bars-sidebar .seg.filled {
+  background: var(--accent);
+}

@@ -1,0 +1,246 @@
+/* The simulated LCD display: lives inside the SVG via a <foreignObject>,
+   driven entirely by radio/screenView.js setting data-power on #lcdScreen
+   and updating a few text/bar elements. Boot splash, home screen, and the
+   transient volume HUD are all here. */
+
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
+.lcd-screen {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+  font-family: "VT323", "Consolas", monospace;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.lcd-screen .off-view,
+.lcd-screen .boot-view,
+.lcd-screen .home-view {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.lcd-screen[data-power="off"] .off-view {
+  display: block;
+  background: #000;
+}
+
+.lcd-screen[data-power="booting"] .boot-view {
+  display: flex;
+}
+
+.lcd-screen[data-power="on"] .home-view {
+  display: flex;
+}
+
+/* Boot splash */
+.boot-view {
+  background: #000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.boot-logo-circle {
+  width: 42%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #1f5fd6, #002d9c 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px rgba(31, 95, 214, 0.6);
+}
+
+.boot-logo-m {
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 900;
+  font-size: 3.6em;
+  transform: translateY(-2%);
+}
+
+.boot-brand {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 1.5em;
+  margin-top: 0.7em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.boot-subbrand {
+  color: #d8d8d8;
+  font-style: italic;
+  font-size: 1em;
+  letter-spacing: 0.08em;
+  font-family: Georgia, serif;
+  margin-top: 0.15em;
+}
+
+/* Home screen */
+.home-view {
+  background: #c3c8c3;
+  color: #000;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 0 10px;
+  font-size: 1.1em;
+  font-weight: bold;
+  height: 11%;
+  flex: none;
+}
+
+.icon-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-group-center {
+  gap: 10px;
+  font-size: 0.9em;
+}
+
+.icon-signal {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.icon-signal .bar {
+  display: inline-block;
+  width: 4px;
+  background: #1e8e3e;
+  border-radius: 1px;
+}
+
+.icon-signal .b1 {
+  height: 30%;
+}
+.icon-signal .b2 {
+  height: 55%;
+}
+.icon-signal .b3 {
+  height: 78%;
+}
+.icon-signal .b4 {
+  height: 100%;
+}
+
+.icon-battery {
+  display: inline-block;
+  width: 20px;
+  height: 12px;
+  border: 2px solid #000;
+  border-radius: 2px;
+  position: relative;
+  background: linear-gradient(to right, #1e8e3e 0 78%, transparent 78% 100%);
+}
+
+.icon-battery::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 3px;
+  width: 2px;
+  height: 6px;
+  background: #000;
+}
+
+.time-display {
+  padding: 2px 10px 0 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  flex: none;
+}
+
+.main-text-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 0;
+}
+
+.main-text-line {
+  font-size: 1.9em;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+}
+
+.menu-bar {
+  display: flex;
+  height: 14%;
+  flex: none;
+  background: #000;
+}
+
+.menu-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.05em;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.menu-item:not(:last-child) {
+  border-right: 1px solid #444;
+}
+
+/* Transient volume HUD, overlaid on the home screen */
+.volume-hud {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 17%;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
+  font-weight: bold;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.volume-hud.visible {
+  opacity: 1;
+}
+
+.volume-hud-bars {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.volume-hud-bars .seg {
+  flex: 1;
+  height: 10px;
+  background: #444;
+  border-radius: 1px;
+}
+
+.volume-hud-bars .seg.filled {
+  background: #34c759;
+}

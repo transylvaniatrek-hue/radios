@@ -1,0 +1,223 @@
+/* Page chrome: variables, layout grid, sidebar cards, log list, tooltip.
+   Control-specific styling (hotspot states, PTT/radio status widgets)
+   lives in hotspots.css; the simulated LCD lives in screen.css. */
+
+:root {
+  --bg: #14171c;
+  --panel: #1c2027;
+  --panel-border: #2c313b;
+  --text: #e8eaed;
+  --muted: #9aa2ad;
+  --accent: #ff8a00;
+  --accent-soft: rgba(255, 138, 0, 0.55);
+  --hover: rgba(56, 189, 248, 0.28);
+  --hover-stroke: rgba(56, 189, 248, 0.9);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  align-items: start;
+}
+
+header.top {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+}
+
+header.top h1 {
+  font-size: 1.4rem;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+header.top p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.radio-stage {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.radio-stage svg {
+  width: 100%;
+  height: auto;
+  max-height: 88vh;
+  user-select: none;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.card h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat-row .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-row .stat-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#resetBtn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#resetBtn:hover {
+  background: rgba(255, 138, 0, 0.12);
+  border-color: var(--accent);
+}
+
+/* ---- Activity log ---- */
+.log-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#logList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  max-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#logList li {
+  font-size: 0.85rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+}
+
+.log-state {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.log-state.on {
+  color: var(--accent);
+}
+
+.log-state.off {
+  color: var(--muted);
+}
+
+/* ---- Tooltip ---- */
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(20, 23, 28, 0.95);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 50;
+  white-space: nowrap;
+}
+
+#tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 980px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+  }
+}
