@@ -67,14 +67,42 @@ header.top p {
   border-radius: 12px;
   padding: 16px;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 24px;
 }
 
 .radio-stage svg {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
   max-height: 88vh;
   user-select: none;
+}
+
+/* Larger, easier-to-read copy of the LCD, shown next to the radio (kept
+   in sync by radio/screenView.js — see js/radio/lcdTemplate.js). */
+.large-screen-panel {
+  flex: 1 1 300px;
+  max-width: 420px;
+  display: flex;
+  justify-content: center;
+}
+
+.large-screen-bezel {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 418.24 / 416.41; /* matches the real screen's proportions */
+  background: #000;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 0 0 1px var(--panel-border), 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
+.large-screen-bezel .lcd-screen-host {
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 /* ---- Sidebar ---- */
