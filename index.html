@@ -4,7 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Viper 8000 Radio Trainer — Proof of Concept</title>
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/hotspots.css" />
+<link rel="stylesheet" href="css/screen.css" />
 </head>
 <body>
 <div class="app">
@@ -65,6 +67,55 @@
         <ellipse id="batteryLatchRight" class="cls-1" cx="1429.63" cy="2830.36" rx="27.52" ry="77.04"/>
         <ellipse id="microphone" class="cls-1" cx="894.45" cy="1271.59" rx="57.32" ry="25.22"/>
       </g>
+      <!-- Live LCD display, layered on top of the radioScreen hotspot -->
+      <foreignObject x="835.29" y="1417.88" width="418.24" height="416.41">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="lcd-screen" id="lcdScreen" data-power="off">
+          <div class="off-view" id="offView"></div>
+
+          <div class="boot-view" id="bootView">
+            <div class="boot-logo-circle"><span class="boot-logo-m">M</span></div>
+            <div class="boot-brand">MOTOROLA</div>
+            <div class="boot-subbrand">SOLUTIONS</div>
+          </div>
+
+          <div class="home-view" id="homeView">
+            <div class="status-bar">
+              <div class="icon-group">
+                <span class="icon-signal" id="iconSignal" aria-label="Signal strength">
+                  <span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span>
+                </span>
+              </div>
+              <div class="icon-group icon-group-center">
+                <span id="iconScan" title="Scan">Z</span>
+                <span id="iconEmg" title="Emergency">&#9650;</span>
+                <span id="iconGps" title="GPS">&#9992;</span>
+              </div>
+              <div class="icon-group">
+                <span class="icon-battery" id="iconBattery" aria-label="Battery"></span>
+              </div>
+            </div>
+
+            <div class="time-display" id="timeDisplay">--:--</div>
+
+            <div class="main-text-area">
+              <div class="main-text-line" id="line1">TC Viper</div>
+              <div class="main-text-line" id="line2">TAC 1</div>
+              <div class="main-text-line" id="line3">Employee</div>
+            </div>
+
+            <div class="volume-hud" id="volumeHud">
+              <span class="volume-hud-label">VOL</span>
+              <div class="volume-hud-bars" id="volumeHudBars"></div>
+            </div>
+
+            <div class="menu-bar">
+              <div class="menu-item" id="menu1">Mute</div>
+              <div class="menu-item" id="menu2">Clck</div>
+              <div class="menu-item" id="menu3">Zone</div>
+            </div>
+          </div>
+        </div>
+      </foreignObject>
     </svg>
   </main>
 
@@ -76,6 +127,23 @@
         <span class="stat-label">controls highlighted</span>
       </div>
       <button id="resetBtn" type="button">Reset All</button>
+    </div>
+
+    <div class="card" id="radioCard">
+      <h2>Radio</h2>
+      <div class="radio-status-row">
+        <span class="radio-power-dot" id="radioPowerDot"></span>
+        <span id="radioPowerText">Off</span>
+      </div>
+      <div class="volume-row">
+        <span class="stat-label">Volume</span>
+        <div class="volume-bars-sidebar" id="volumeBarsSidebar"></div>
+        <span id="volumeNumber" class="stat-label">0/8</span>
+      </div>
+      <p class="ptt-hint">
+        Click the upper-right edge of the volume knob to power on / turn up.
+        Click the lower-left edge to turn down; reducing to 0 powers off.
+      </p>
     </div>
 
     <div class="card" id="pttCard">
@@ -101,6 +169,6 @@
 
 <div id="tooltip"></div>
 
-<script src="script.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
