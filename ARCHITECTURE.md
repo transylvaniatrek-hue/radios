@@ -37,10 +37,21 @@ radio/radioState.js    ptt/pttController.js      ui/hotspotHighlight.js
        ┌──────────────┼──────────────────┐
        ▼              ▼                  ▼
 radio/screenView.js  ptt/pttView.js  ui/activityLog.js
- (LCD + sidebar        (PTT hotspot     (turns every event
-  Radio card)           glow + sidebar   into a log line)
+ (LCD instances +      (PTT hotspot     (turns every event
+  sidebar Radio card)   glow + sidebar   into a log line)
                         PTT card)
 ```
+
+There are two LCD instances on screen at once — the radio's real screen
+(inside an SVG `<foreignObject>`) and a larger auxiliary copy next to it,
+for readability. Both are clones of the same `<template id="lcdScreenTemplate">`
+in `index.html` (see `radio/lcdTemplate.js`), so screen content is only ever
+defined in one place. `screenView.js` takes a `screens: [...]` array and
+updates every instance together — adding a third screen anywhere on the
+page would be a one-line change in `main.js`, not a new code path.
+
+Note there's no on-screen volume indicator: the real radio doesn't show one
+on its display, so that feedback lives only in the sidebar Radio card.
 
 **Controllers** (`radioState.js`, `pttController.js`) own state machines and
 know nothing about the DOM. They read tunable numbers from `config/config.js`
@@ -75,16 +86,18 @@ treat it as the contract activities are built against.
 | Tune volume steps / boot duration | `js/config/config.js` → `RADIO_CONFIG` |
 | Rename/relabel a hotspot | `js/config/config.js` → `BUTTON_LABELS` |
 | Change what the activity log says for an event | `js/ui/activityLog.js` only |
-| Change the LCD's look (colors, layout) | `css/screen.css` + the `#homeView`/`#bootView` markup in `index.html` |
+| Change the LCD's look (colors, layout) | `css/screen.css` + the markup inside `<template id="lcdScreenTemplate">` in `index.html` (cloned into every screen instance, so one edit updates all of them) |
+| Add another copy of the screen elsewhere on the page | Add a host element in `index.html`, then one more `instantiateLcdScreen(...)` call in `main.js`'s `screens` array |
 | Add a new physical control with special (non-toggle) behavior | Add its id to `SPECIAL_IDS` in `config.js`, write a controller in a new folder (mirror `ptt/` or `radio/`), emit new events in `events.js`, wire it in `main.js` |
 | Add a brand-new activity/level system | New top-level folder (e.g. `js/activities/`) that only imports `core/eventBus.js` + `core/events.js` — it shouldn't need to import controllers directly |
 
 ## File map
 
 ```
-index.html                 Markup + inline SVG hotspots + LCD foreignObject
+index.html                 Markup + inline SVG hotspots + <template id="lcdScreenTemplate">
 css/
-  base.css                 Page chrome: layout, sidebar cards, log, tooltip
+  base.css                 Page chrome: layout, sidebar cards, log, tooltip,
+                             large-screen-panel layout
   hotspots.css             SVG control states (hover/active/PTT glow/knob flash)
   screen.css                The simulated LCD (boot splash + home screen)
 js/
@@ -96,7 +109,8 @@ js/
     config.js                 Labels, groups, special-ids, timing constants
   radio/
     radioState.js             Power/volume state machine (no DOM)
-    screenView.js               LCD + sidebar Radio card (view)
+    screenView.js               Drives every LCD instance + sidebar Radio card (view)
+    lcdTemplate.js                Clones <template id="lcdScreenTemplate"> into a host
     volumeKnobInput.js           Knob click → radioState calls (input)
   ptt/
     pttController.js           Hold-to-transmit state machine (no DOM)
