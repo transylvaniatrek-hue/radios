@@ -4,8 +4,8 @@
 // to look when tuning the simulation rather than hunting through
 // controllers.
 
-// Friendly labels for each hotspot id in viperFrontMap.svg — shown in
-// tooltips, the activity log, and aria-labels.
+// Friendly labels for each hotspot id in viperFrontMap.svg / viperTopMap.svg
+// — shown in tooltips, the activity log, and aria-labels.
 export const BUTTON_LABELS = {
   one: "Keypad 1",
   two: "Keypad 2",
@@ -28,7 +28,7 @@ export const BUTTON_LABELS = {
   menuSelectOne: "Menu / Select Softkey 1",
   menuSelectTwo: "Menu / Select Softkey 2",
   menuSelectThree: "Menu / Select Softkey 3",
-  topOrangeButton: "Orange Button",
+  topOrangeButton: "Orange Button (Scan)",
   sixteenPositionKnobClockwise: "16-Position Channel Knob",
   sixteenPositionKnobCounterClockwise: "16-Position Channel Knob",
   threePositionABCSwitch: "A/B/C 3-Position Switch",
@@ -42,15 +42,31 @@ export const BUTTON_LABELS = {
   batteryLatchRight: "Battery Latch – Right",
   microphone: "Microphone",
   radioScreen: "Display Screen",
+
+  // Top-view-only hotspots (viperTopMap.svg) — the rest of the top view's
+  // controls are the same physical parts as the front view, just viewed
+  // from a different angle; see GROUPS/LOCK_EXEMPT_IDS below for how they
+  // stay in sync with their front-view counterparts.
+  screen_top: "Display Screen",
+  orange_top: "Orange Button (Scan)",
+  _3_position_switch: "A/B/C 3-Position Switch",
+  lock_switch: "Lock / Unlock Switch",
+  on_off_volume_clockwise: "On/Off – Volume Knob",
+  on_off_volume_counterclockwise: "On/Off – Volume Knob",
+  _16_position_clockwise: "16-Position Channel Knob",
+  _16_position_counterclockwise: "16-Position Channel Knob",
 };
 
-// Hotspots that are two SVG shapes representing a single physical control.
-// Clicking either half toggles both halves together (generic highlight
-// hotspots only — the on/off-volume knob has its own dedicated logic, see
-// radio/volumeKnobInput.js, since it isn't a simple on/off toggle).
+// Hotspots that are two (or more) SVG shapes representing a single physical
+// control — including the same control seen from both the front and top
+// views. Clicking any of them toggles the shared on/off state together.
 export const GROUPS = {
   sixteenPositionKnobClockwise: "channelKnob",
   sixteenPositionKnobCounterClockwise: "channelKnob",
+  _16_position_clockwise: "channelKnob",
+  _16_position_counterclockwise: "channelKnob",
+  threePositionABCSwitch: "abcSwitch",
+  _3_position_switch: "abcSwitch",
 };
 
 export function groupOf(id) {
@@ -78,29 +94,31 @@ export const SPECIAL_IDS = new Set([
   "eight",
   "nine",
   "menuSelectOne",
+  "topOrangeButton",
+  // Top-view-only:
+  "screen_top",
+  "orange_top",
+  "lock_switch",
+  "on_off_volume_clockwise",
+  "on_off_volume_counterclockwise",
 ]);
 
-// ---- Home screen: channel select + mute ---------------------------------
-// Only active on the regular home screen (radio powered on, no settings
-// menu — see radio/homeScreenController.js). Selecting a channel updates
-// the LCD's top two lines; the third line always shows the operator label
-// except for the momentary mute notice.
-export const CHANNEL_PRESETS = {
-  one: { line1: "TC Main", line2: "FIRE" },
-  two: { line1: "TC Main", line2: "Rescue 280" },
-  three: { line1: "TC Main", line2: "Ops 3" },
-  four: { line1: "TC Main", line2: "EMS" },
-  five: { line1: "TC Main", line2: "Viper EM" },
-  six: { line1: "Local Hospital", line2: "TRH" },
-  seven: { line1: "TC Main", line2: "FIRE" },
-  eight: { line1: "TC Main", line2: "FIRE" },
-  nine: { line1: "TC Main", line2: "FIRE" },
-};
-
-export const HOME_SCREEN = {
-  line3Default: "Employee",
-  muteNoticeDurationMs: 1000, // how long "Tones Off"/"Tones On" shows before reverting
-};
+// The knobs and switches that stay usable even when the radio is locked —
+// everything else beeps instead of acting (see radio/lockController.js).
+// Includes both the front- and top-view hotspot ids for each physical
+// control.
+export const LOCK_EXEMPT_IDS = new Set([
+  "onOffVolumeClockwise",
+  "onOffVolumeCounterClockwise",
+  "on_off_volume_clockwise",
+  "on_off_volume_counterclockwise",
+  "sixteenPositionKnobClockwise",
+  "sixteenPositionKnobCounterClockwise",
+  "_16_position_clockwise",
+  "_16_position_counterclockwise",
+  "threePositionABCSwitch",
+  "_3_position_switch",
+]);
 
 // ---- PTT timing model ---------------------------------------------------
 // The numbers to tune to match the real radio's behavior.
@@ -131,6 +149,31 @@ export const PTT_PHASE_TEXT = {
 export const RADIO_CONFIG = {
   volumeMax: 8,
   bootDurationMs: 2200, // how long the Motorola boot splash is shown
-  volumeHudDurationMs: 1500, // how long the on-screen volume HUD stays visible
   clockRefreshMs: 15000, // how often the home-screen clock re-reads the time
+  topScreenRotateMs: 1500, // how long each line shows on the top view's single-line display
+};
+
+// ---- Home screen: channel select + mute ---------------------------------
+// Only active on the regular home screen (radio powered on, not locked —
+// see radio/homeScreenController.js). Selecting a channel updates the
+// display's top two lines; the third line always shows the operator label
+// except for the momentary mute notice.
+export const CHANNEL_PRESETS = {
+  one: { line1: "TC Main", line2: "FIRE" },
+  two: { line1: "TC Main", line2: "Rescue 280" },
+  three: { line1: "TC Main", line2: "Ops 3" },
+  four: { line1: "TC Main", line2: "EMS" },
+  five: { line1: "TC Main", line2: "Viper EM" },
+  six: { line1: "Local Hospital", line2: "TRH" },
+  seven: { line1: "TC Main", line2: "FIRE" },
+  eight: { line1: "TC Main", line2: "FIRE" },
+  nine: { line1: "TC Main", line2: "FIRE" },
+};
+
+export const HOME_SCREEN = {
+  defaultLine1: "TC Viper",
+  defaultLine2: "TAC 1",
+  line3Default: "Employee",
+  muteNoticeDurationMs: 1000, // how long "Tones Off"/"Tones On" shows before reverting
+  lockedText: "CTRL LCK", // shown on the top view's single-line display while locked
 };

@@ -73,7 +73,7 @@ header.top p {
   gap: 24px;
 }
 
-.radio-stage svg {
+.radio-stage .radio-svg {
   width: auto;
   max-width: 100%;
   height: auto;
@@ -81,11 +81,61 @@ header.top p {
   user-select: none;
 }
 
+/* Only one of the front/top radio images (and their matching large-screen
+   panel) is shown at a time, switched by ui/viewToggle.js setting
+   data-view on #radioStage. */
+.radio-stage[data-view="front"] .view-top {
+  display: none;
+}
+
+.radio-stage[data-view="top"] .view-front {
+  display: none;
+}
+
+.large-screen-column {
+  flex: 1 1 300px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Front/Top view toggle, shown above the large display panel. */
+.view-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.view-toggle-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.view-toggle-btn:hover {
+  color: var(--text);
+}
+
+.view-toggle-btn.active {
+  background: var(--accent);
+  color: #1a1200;
+}
+
 /* Larger, easier-to-read copy of the LCD, shown next to the radio (kept
    in sync by radio/screenView.js — see js/radio/lcdTemplate.js). */
 .large-screen-panel {
-  flex: 1 1 300px;
-  max-width: 420px;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
@@ -93,11 +143,19 @@ header.top p {
 .large-screen-bezel {
   width: 100%;
   max-width: 380px;
-  aspect-ratio: 418.24 / 416.41; /* matches the real screen's proportions */
+  aspect-ratio: 418.24 / 416.41; /* matches the front screen's proportions */
   background: #000;
   border-radius: 12px;
   padding: 14px;
   box-shadow: 0 0 0 1px var(--panel-border), 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* The top view's screen is a short, wide rectangle — a different shape
+   from the front view's near-square display (see viperTopMap.svg's
+   screen_top rect: 600 × 336). */
+.large-screen-bezel-top {
+  aspect-ratio: 600 / 336;
+  max-width: none;
 }
 
 .large-screen-bezel .lcd-screen-host {

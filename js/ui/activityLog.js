@@ -47,6 +47,9 @@ export function initActivityLog(logListEl) {
   bus.on(EVENTS.RADIO_NOTICE, ({ message }) => radio(message));
   bus.on(EVENTS.RADIO_CHANNEL_CHANGED, ({ line1, line2 }) => radio(`Channel changed → ${line1} / ${line2}.`));
   bus.on(EVENTS.RADIO_MUTE_CHANGED, ({ muted }) => radio(muted ? "Muted (Tones Off)." : "Unmuted (Tones On)."));
+  bus.on(EVENTS.RADIO_LOCK_CHANGED, ({ locked }) => radio(locked ? "Radio locked." : "Radio unlocked."));
+  bus.on(EVENTS.RADIO_LOCKED_INPUT, ({ id }) => radio(`${labelFor(id)} pressed while locked — beep, no action.`));
+  bus.on(EVENTS.RADIO_SCAN_CHANGED, ({ scanning }) => radio(scanning ? "Scan ON." : "Scan OFF."));
 
   // ---- PTT ----
   bus.on(EVENTS.PTT_PRESSED, ({ supported }) => {

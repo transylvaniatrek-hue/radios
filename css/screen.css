@@ -1,10 +1,12 @@
-/* The simulated LCD display. Two instances exist (the radio's real screen,
-   inside a <foreignObject>, and a larger auxiliary copy — see
-   js/radio/lcdTemplate.js), both driven by radio/screenView.js setting
-   data-power on .lcd-screen and updating the clock text. Boot splash and
-   home screen are both here. There is no on-screen volume indicator — the
-   real radio doesn't show one, so that feedback lives only in the sidebar
-   Radio card (see hotspots.css). */
+/* The simulated LCD display. Four instances exist — front/top views, each
+   with an on-radio <foreignObject> copy and a larger auxiliary copy — all
+   driven by radio/screenView.js (see js/radio/lcdTemplate.js). The base
+   .lcd-screen rules below are the front-view style (three stacked lines,
+   full icon row, clock); the top-view style (.lcd-screen-top — single
+   rotating line, reduced icon row, no clock) is lower in this file. There
+   is no on-screen volume indicator on either — the real radio doesn't show
+   one, so that feedback lives only in the sidebar Radio card (see
+   hotspots.css). */
 
 @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
 
@@ -213,4 +215,116 @@
 
 .menu-item:not(:last-child) {
   border-right: 1px solid #444;
+}
+
+/* Scan icon ("Z") — present in both templates, shown only while scan mode
+   is on (see radio/scanController.js). Uses opacity rather than
+   display:none so the icon row's layout never shifts. */
+[data-role="scanIcon"] {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+[data-role="scanIcon"].scan-active {
+  opacity: 1;
+}
+
+/* =========================================================
+   Top view's display: light background, blue text, single
+   rotating line, reduced icon row, no clock. See the
+   "Look Here" reference photos and js/radio/lcdTemplate.js.
+   ========================================================= */
+.lcd-screen-top .off-view,
+.lcd-screen-top .boot-view,
+.lcd-screen-top .home-view-top {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.lcd-screen-top[data-power="off"] .off-view {
+  display: block;
+  background: #000;
+}
+
+.lcd-screen-top[data-power="booting"] .boot-view {
+  display: flex;
+}
+
+.lcd-screen-top[data-power="on"] .home-view-top {
+  display: flex;
+}
+
+/* The shared .boot-view content is reused here, just scaled down to fit
+   the top screen's short, wide proportions. */
+.lcd-screen-top .boot-logo-circle {
+  width: 20%;
+}
+
+.lcd-screen-top .boot-logo-m {
+  font-size: 1.8em;
+}
+
+.lcd-screen-top .boot-brand {
+  font-size: 1em;
+  margin-top: 0.4em;
+}
+
+.home-view-top {
+  background: #eaf6fb;
+  color: #0b3fae;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 6px 12px;
+}
+
+.status-bar-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 22%;
+  flex: none;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.icon-scan-top {
+  font-size: 1em;
+}
+
+.icon-h-top {
+  font-size: 0.85em;
+}
+
+.icon-battery-top {
+  margin-left: auto;
+  display: inline-block;
+  width: 20px;
+  height: 12px;
+  border: 2px solid #0b3fae;
+  border-radius: 2px;
+  position: relative;
+  background: linear-gradient(to right, #0b3fae 0 78%, transparent 78% 100%);
+}
+
+.icon-battery-top::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 3px;
+  width: 2px;
+  height: 6px;
+  background: #0b3fae;
+}
+
+.single-line-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-size: 2.4em;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

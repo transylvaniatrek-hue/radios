@@ -1,17 +1,33 @@
-// Instantiates the shared <template id="lcdScreenTemplate"> (see index.html)
-// into a host element. The LCD's markup is defined in exactly one place even
-// though it's rendered twice — once on the radio's real screen, once in the
-// larger auxiliary panel next to it — so future screen-content changes never
-// need to be made in two places.
-export function instantiateLcdScreen(hostEl) {
-  const template = document.getElementById("lcdScreenTemplate");
+// Instantiates one of the shared LCD <template>s (see index.html) into a
+// host element. Screen content is defined in exactly one place per flavor
+// even though it's rendered multiple times — once per view (front/top) on
+// the radio's real screen, and once per view in the larger auxiliary panel
+// — so future screen-content changes never need to be made in more than
+// one place per flavor.
+//
+// "multi" (front view): three stacked lines + clock + full icon row.
+// "single" (top view): one line that rotates through the three values +
+// a reduced icon row, no clock.
+export function instantiateLcdScreen(hostEl, kind = "multi") {
+  const templateId = kind === "single" ? "lcdScreenTopTemplate" : "lcdScreenTemplate";
+  const template = document.getElementById(templateId);
   const node = template.content.firstElementChild.cloneNode(true);
   hostEl.appendChild(node);
-  return {
+
+  const refs = {
+    kind,
     lcdScreen: node,
-    timeDisplay: node.querySelector('[data-role="time"]'),
-    line1: node.querySelector('[data-role="line1"]'),
-    line2: node.querySelector('[data-role="line2"]'),
-    line3: node.querySelector('[data-role="line3"]'),
+    scanIcon: node.querySelector('[data-role="scanIcon"]'),
   };
+
+  if (kind === "single") {
+    refs.singleLine = node.querySelector('[data-role="singleLine"]');
+  } else {
+    refs.timeDisplay = node.querySelector('[data-role="time"]');
+    refs.line1 = node.querySelector('[data-role="line1"]');
+    refs.line2 = node.querySelector('[data-role="line2"]');
+    refs.line3 = node.querySelector('[data-role="line3"]');
+  }
+
+  return refs;
 }

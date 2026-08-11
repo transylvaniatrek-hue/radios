@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2268 1609">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #e6e7e8;
+        stroke: #231f20;
+        stroke-linecap: round;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        stroke: #000;
+      }
+    </style>
+  </defs>
+  <g id="background">
+    <image width="2268" height="1609" xlink:href="viper top.png"/>
+  </g>
+  <g id="items">
+    <rect id="screen_top" class="cls-2" x="799" y="860" width="600" height="336"/>
+    <ellipse id="orange_top" class="cls-2" cx="1527" cy="524" rx="176" ry="169"/>
+    <ellipse id="_3_position_switch" data-name="3_position_switch" class="cls-1" cx="735" cy="436" rx="150.61" ry="60.81" transform="translate(-93.02 647.42) rotate(-45)"/>
+    <polygon id="lock_switch" class="cls-2" points="1192 814 994 814 1024 750 1166 752 1192 814"/>
+    <path id="on_off_volume_clockwise" class="cls-2" d="M328,1030c144.15,0,261-111.03,261-248s-116.85-248-261-248"/>
+    <path id="on_off_volume_counterclockwise" class="cls-2" d="M328,534c-144.15,0-261,111.03-261,248s116.85,248,261,248"/>
+    <path id="_16_position_counterclockwise" data-name="16_position_counterclockwise" class="cls-2" d="M1098,710c-113.22,0-205-100.29-205-224s91.78-224,205-224"/>
+    <path id="_16_position_clockwise" data-name="16_position_clockwise" class="cls-2" d="M1098,262c113.22,0,205,100.29,205,224s-91.78,224-205,224"/>
+  </g>
+</svg>

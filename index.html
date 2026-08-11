@@ -30,7 +30,7 @@
           </span>
         </div>
         <div class="icon-group icon-group-center">
-          <span title="Scan">Z</span>
+          <span class="icon-scan" data-role="scanIcon" title="Scan">Z</span>
           <span title="Emergency">&#9650;</span>
           <span title="GPS">&#9992;</span>
         </div>
@@ -56,15 +56,39 @@
   </div>
 </template>
 
+<!-- Top view's small display: light background, blue text, a single line
+     that rotates through the three channel values instead of stacking
+     them, and a reduced icon row (no signal bars, no clock). See
+     js/radio/lcdTemplate.js and the "Look Here" reference photos. -->
+<template id="lcdScreenTopTemplate">
+  <div class="lcd-screen lcd-screen-top" data-power="off">
+    <div class="off-view"></div>
+
+    <div class="boot-view">
+      <div class="boot-logo-circle"><span class="boot-logo-m">M</span></div>
+      <div class="boot-brand">MOTOROLA</div>
+    </div>
+
+    <div class="home-view-top">
+      <div class="status-bar-top">
+        <span class="icon-scan-top" data-role="scanIcon" title="Scan">Z</span>
+        <span class="icon-h-top" title="H">H</span>
+        <span class="icon-battery-top" aria-label="Battery"></span>
+      </div>
+      <div class="single-line-display" data-role="singleLine">TC Viper</div>
+    </div>
+  </div>
+</template>
+
 <div class="app">
   <header class="top">
     <h1>Viper 8000 Radio Trainer</h1>
     <p>Proof of concept — click any control to highlight it, click again to unhighlight.</p>
   </header>
 
-  <main class="radio-stage">
-    <!-- viewBox and hotspot geometry sourced from viperFrontMap.svg -->
-    <svg id="radioMap" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2086 3508">
+  <main class="radio-stage" id="radioStage" data-view="front">
+    <!-- Front view. viewBox and hotspot geometry sourced from viperFrontMap.svg -->
+    <svg id="radioMap" class="radio-svg view-front" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2086 3508">
       <defs>
         <style>
           .cls-1 {
@@ -77,7 +101,7 @@
       <g id="background">
         <image width="2086" height="3508" xlink:href="viper front3.png" />
       </g>
-      <g id="InteractiveElements">
+      <g id="InteractiveElements" class="hotspot-group">
         <rect id="radioScreen" class="cls-1" x="835.29" y="1417.88" width="418.24" height="416.41"/>
         <path id="one" class="cls-1" d="M827.95,2281.88h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
         <path id="four" class="cls-1" d="M831.62,2393.78h110.06v71.54h-99.52c-16.96,0-30.73-13.77-30.73-30.73v-20.64c0-11.14,9.04-20.18,20.18-20.18Z"/>
@@ -121,11 +145,67 @@
       </foreignObject>
     </svg>
 
-    <!-- Larger copy of the same LCD, for readability — kept in sync with
-         the on-radio screen by radio/screenView.js. -->
-    <div class="large-screen-panel">
-      <div class="large-screen-bezel">
-        <div class="lcd-screen-host" id="lcdScreenLargeHost"></div>
+    <!-- Top view. viewBox and hotspot geometry sourced from viperTopMap.svg.
+         Same physical radio — the volume knob, channel knob, A/B/C switch,
+         and orange button here are the SAME controls as the front view's,
+         just seen from above (see config.GROUPS / main.js for how the two
+         stay in sync). The lock switch only exists in this view. -->
+    <svg id="radioMapTop" class="radio-svg view-top" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2268 1609">
+      <defs>
+        <style>
+          .top-cls-1 {
+            fill: #e6e7e8;
+            stroke: #231f20;
+            stroke-linecap: round;
+            stroke-miterlimit: 10;
+          }
+          .top-cls-2 {
+            fill: #fff;
+            stroke: #000;
+            stroke-miterlimit: 10;
+          }
+        </style>
+      </defs>
+      <g id="backgroundTop">
+        <image width="2268" height="1609" xlink:href="viper top.png" />
+      </g>
+      <g id="InteractiveElementsTop" class="hotspot-group">
+        <rect id="screen_top" class="top-cls-2" x="799" y="860" width="600" height="336"/>
+        <ellipse id="orange_top" class="top-cls-2" cx="1527" cy="524" rx="176" ry="169"/>
+        <ellipse id="_3_position_switch" class="top-cls-1" cx="735" cy="436" rx="150.61" ry="60.81" transform="translate(-93.02 647.42) rotate(-45)"/>
+        <polygon id="lock_switch" class="top-cls-2" points="1192 814 994 814 1024 750 1166 752 1192 814"/>
+        <path id="on_off_volume_clockwise" class="top-cls-2" d="M328,1030c144.15,0,261-111.03,261-248s-116.85-248-261-248"/>
+        <path id="on_off_volume_counterclockwise" class="top-cls-2" d="M328,534c-144.15,0-261,111.03-261,248s116.85,248,261,248"/>
+        <path id="_16_position_counterclockwise" class="top-cls-2" d="M1098,710c-113.22,0-205-100.29-205-224s91.78-224,205-224"/>
+        <path id="_16_position_clockwise" class="top-cls-2" d="M1098,262c113.22,0,205,100.29,205,224s-91.78,224-205,224"/>
+      </g>
+      <!-- Live LCD display for the top view. Filled by cloning
+           #lcdScreenTopTemplate — see js/radio/lcdTemplate.js. -->
+      <foreignObject x="799" y="860" width="600" height="336">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="lcd-screen-host" id="lcdScreenTopHost"></div>
+      </foreignObject>
+    </svg>
+
+    <div class="large-screen-column">
+      <div class="view-toggle" id="viewToggle" role="tablist" aria-label="Radio view">
+        <button type="button" class="view-toggle-btn" id="viewToggleFront" role="tab">Front View</button>
+        <button type="button" class="view-toggle-btn" id="viewToggleTop" role="tab">Top View</button>
+      </div>
+
+      <!-- Larger copy of the front-view LCD, for readability — kept in
+           sync with the on-radio screen by radio/screenView.js. -->
+      <div class="large-screen-panel view-front">
+        <div class="large-screen-bezel">
+          <div class="lcd-screen-host" id="lcdScreenLargeHost"></div>
+        </div>
+      </div>
+
+      <!-- Larger copy of the top-view LCD. Different proportions (wide,
+           short) to match the real top display — see css/base.css. -->
+      <div class="large-screen-panel view-top">
+        <div class="large-screen-bezel large-screen-bezel-top">
+          <div class="lcd-screen-host" id="lcdScreenLargeTopHost"></div>
+        </div>
       </div>
     </div>
   </main>
@@ -151,9 +231,15 @@
         <div class="volume-bars-sidebar" id="volumeBarsSidebar"></div>
         <span id="volumeNumber" class="stat-label">0/8</span>
       </div>
+      <div class="radio-status-row lock-status-row">
+        <span class="radio-lock-dot" id="radioLockDot"></span>
+        <span id="radioLockText">Unlocked</span>
+      </div>
       <p class="ptt-hint">
         Click the upper-right edge of the volume knob to power on / turn up.
         Click the lower-left edge to turn down; reducing to 0 powers off.
+        The lock switch is only visible from the Top View — locking still
+        lets the knobs and A/B/C switch work, but every button just beeps.
       </p>
     </div>
 

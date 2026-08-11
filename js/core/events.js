@@ -22,6 +22,15 @@ export const EVENTS = {
   RADIO_CHANNEL_CHANGED: "radio:channel-changed", // { id, line1, line2 }
   RADIO_MUTE_CHANGED: "radio:mute-changed", // { muted }
 
+  // Lock/unlock — see radio/lockController.js. Locking still allows the
+  // volume and channel knobs (and the A/B/C switch) to work; every other
+  // button beeps instead of acting while locked.
+  RADIO_LOCK_CHANGED: "radio:lock-changed", // { locked }
+  RADIO_LOCKED_INPUT: "radio:locked-input", // { id } — a button was pressed while locked (beep, no action)
+
+  // Scan mode — see radio/scanController.js
+  RADIO_SCAN_CHANGED: "radio:scan-changed", // { scanning }
+
   // PTT hold-to-transmit lifecycle — see ptt/pttController.js
   PTT_PHASE_CHANGED: "ptt:phase-changed", // { phase: 'idle'|'acquiring'|'keying'|'recording'|'processing'|'playing' }
   PTT_PRESSED: "ptt:pressed", // { supported }
@@ -36,5 +45,9 @@ export const EVENTS = {
   PTT_ERROR: "ptt:error", // { message }
 
   // Microphone permission priming on page load — see ptt/pttController.js
-  MIC_PERMISSION_RESULT: "mic:permission-result", // { granted }
+  MIC_PERMISSION_RESULT: "mic:permission-result", // { granted, supported }
+
+  // Front/top view toggle — purely a viewing convenience for this
+  // simulator, not part of the simulated radio hardware. See ui/viewToggle.js.
+  VIEW_MODE_CHANGED: "view:mode-changed", // { mode: 'front'|'top' }
 };

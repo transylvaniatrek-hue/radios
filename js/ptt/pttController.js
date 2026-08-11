@@ -1,6 +1,8 @@
 import { bus } from "../core/eventBus.js";
 import { EVENTS } from "../core/events.js";
 import { PTT_TIMING } from "../config/config.js";
+import { playTone } from "../core/beep.js";
+import { lockController } from "../radio/lockController.js";
 
 export const SUPPORTS_RECORDING =
   !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) &&
@@ -59,20 +61,7 @@ export function createPTTController(el) {
   }
 
   function playBeep() {
-    const ctx = ensureAudioCtx();
-    const dur = PTT_TIMING.beepDurationMs / 1000;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = 1200;
-    const t0 = ctx.currentTime;
-    gain.gain.setValueAtTime(0, t0);
-    gain.gain.linearRampToValueAtTime(0.3, t0 + 0.015);
-    gain.gain.setValueAtTime(0.3, t0 + Math.max(dur - 0.02, 0.015));
-    gain.gain.linearRampToValueAtTime(0, t0 + dur);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.02);
+    playTone({ ctx: ensureAudioCtx(), frequency: 1200, durationMs: PTT_TIMING.beepDurationMs, volume: 0.3 });
   }
 
   function computeAcquireDelay() {
@@ -123,6 +112,12 @@ export function createPTTController(el) {
   async function onPointerDown(evt) {
     if (state.phase !== "idle") return; // busy with a previous transmission
     evt.preventDefault();
+
+    if (lockController.isLocked()) {
+      lockController.blockedBeep("pttButton");
+      return;
+    }
+
     try {
       el.setPointerCapture(evt.pointerId);
     } catch (e) {
