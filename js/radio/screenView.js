@@ -1,6 +1,6 @@
 import { bus } from "../core/eventBus.js";
 import { EVENTS } from "../core/events.js";
-import { RADIO_CONFIG } from "../config/config.js";
+import { RADIO_CONFIG, HOME_SCREEN } from "../config/config.js";
 
 // Renders radioState's events onto every LCD instance (the real on-radio
 // screen and the larger auxiliary panel — see radio/lcdTemplate.js) and the
@@ -13,6 +13,7 @@ export function initScreenView(refs) {
   const { screens, radioPowerDot, radioPowerText, volumeBarsSidebar, volumeNumber } = refs;
 
   let clockTimer = null;
+  let toneRevertTimer = null;
 
   function renderVolumeBars(container, count) {
     container.innerHTML = "";
@@ -48,11 +49,31 @@ export function initScreenView(refs) {
       power === "off" ? "Off" : power === "booting" ? "Booting…" : "On";
 
     if (power === "on") startClock();
-    if (power === "off") stopClock();
+    if (power === "off") {
+      stopClock();
+      clearTimeout(toneRevertTimer);
+      screens.forEach((s) => (s.line3.textContent = HOME_SCREEN.line3Default));
+    }
   });
 
   bus.on(EVENTS.RADIO_VOLUME_CHANGED, ({ volume }) => {
     renderVolumeBars(volumeBarsSidebar, volume);
     volumeNumber.textContent = `${volume}/${RADIO_CONFIG.volumeMax}`;
+  });
+
+  bus.on(EVENTS.RADIO_CHANNEL_CHANGED, ({ line1, line2 }) => {
+    screens.forEach((s) => {
+      s.line1.textContent = line1;
+      s.line2.textContent = line2;
+    });
+  });
+
+  bus.on(EVENTS.RADIO_MUTE_CHANGED, ({ muted }) => {
+    const noticeText = muted ? "Tones Off" : "Tones On";
+    screens.forEach((s) => (s.line3.textContent = noticeText));
+    clearTimeout(toneRevertTimer);
+    toneRevertTimer = setTimeout(() => {
+      screens.forEach((s) => (s.line3.textContent = HOME_SCREEN.line3Default));
+    }, HOME_SCREEN.muteNoticeDurationMs);
   });
 }

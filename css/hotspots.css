@@ -101,6 +101,12 @@
   animation: knobFlash 0.35s ease-out;
 }
 
+/* Same flash, reused for the home-screen keypad/mute action buttons —
+   see radio/homeScreenInput.js. */
+#InteractiveElements > *.action-flash {
+  animation: knobFlash 0.35s ease-out;
+}
+
 /* ---- Sidebar: Push-to-Talk card ---- */
 .ptt-status-row {
   display: flex;

@@ -8,6 +8,7 @@ import { initHotspotHighlight } from "./ui/hotspotHighlight.js";
 import { initScreenView } from "./radio/screenView.js";
 import { instantiateLcdScreen } from "./radio/lcdTemplate.js";
 import { initVolumeKnobInput } from "./radio/volumeKnobInput.js";
+import { initHomeScreenInput } from "./radio/homeScreenInput.js";
 import { createPTTController, primeMicPermission } from "./ptt/pttController.js";
 import { initPTTView } from "./ptt/pttView.js";
 
@@ -52,6 +53,21 @@ document.addEventListener("DOMContentLoaded", () => {
   initVolumeKnobInput({
     clockwiseEl: document.getElementById("onOffVolumeClockwise"),
     counterClockwiseEl: document.getElementById("onOffVolumeCounterClockwise"),
+  });
+
+  initHomeScreenInput({
+    keypadEls: {
+      one: document.getElementById("one"),
+      two: document.getElementById("two"),
+      three: document.getElementById("three"),
+      four: document.getElementById("four"),
+      five: document.getElementById("five"),
+      six: document.getElementById("six"),
+      seven: document.getElementById("seven"),
+      eight: document.getElementById("eight"),
+      nine: document.getElementById("nine"),
+    },
+    muteEl: document.getElementById("menuSelectOne"),
   });
 
   // ---- Push-to-talk ----

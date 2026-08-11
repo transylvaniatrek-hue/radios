@@ -18,6 +18,10 @@ export const EVENTS = {
   RADIO_BOOT_COMPLETE: "radio:boot-complete", // {}
   RADIO_NOTICE: "radio:notice", // { message } — minor informational blurbs (e.g. "already off")
 
+  // Home-screen channel select + mute — see radio/homeScreenController.js
+  RADIO_CHANNEL_CHANGED: "radio:channel-changed", // { id, line1, line2 }
+  RADIO_MUTE_CHANGED: "radio:mute-changed", // { muted }
+
   // PTT hold-to-transmit lifecycle — see ptt/pttController.js
   PTT_PHASE_CHANGED: "ptt:phase-changed", // { phase: 'idle'|'acquiring'|'keying'|'recording'|'processing'|'playing' }
   PTT_PRESSED: "ptt:pressed", // { supported }

@@ -68,7 +68,39 @@ export const SPECIAL_IDS = new Set([
   "onOffVolumeClockwise",
   "onOffVolumeCounterClockwise",
   "radioScreen",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "menuSelectOne",
 ]);
+
+// ---- Home screen: channel select + mute ---------------------------------
+// Only active on the regular home screen (radio powered on, no settings
+// menu — see radio/homeScreenController.js). Selecting a channel updates
+// the LCD's top two lines; the third line always shows the operator label
+// except for the momentary mute notice.
+export const CHANNEL_PRESETS = {
+  one: { line1: "TC Main", line2: "FIRE" },
+  two: { line1: "TC Main", line2: "Rescue 280" },
+  three: { line1: "TC Main", line2: "Ops 3" },
+  four: { line1: "TC Main", line2: "EMS" },
+  five: { line1: "TC Main", line2: "Viper EM" },
+  six: { line1: "Local Hospital", line2: "TRH" },
+  seven: { line1: "TC Main", line2: "FIRE" },
+  eight: { line1: "TC Main", line2: "FIRE" },
+  nine: { line1: "TC Main", line2: "FIRE" },
+};
+
+export const HOME_SCREEN = {
+  line3Default: "Employee",
+  muteNoticeDurationMs: 1000, // how long "Tones Off"/"Tones On" shows before reverting
+};
 
 // ---- PTT timing model ---------------------------------------------------
 // The numbers to tune to match the real radio's behavior.

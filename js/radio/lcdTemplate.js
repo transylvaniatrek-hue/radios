@@ -10,5 +10,8 @@ export function instantiateLcdScreen(hostEl) {
   return {
     lcdScreen: node,
     timeDisplay: node.querySelector('[data-role="time"]'),
+    line1: node.querySelector('[data-role="line1"]'),
+    line2: node.querySelector('[data-role="line2"]'),
+    line3: node.querySelector('[data-role="line3"]'),
   };
 }

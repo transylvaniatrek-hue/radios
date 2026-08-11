@@ -45,6 +45,8 @@ export function initActivityLog(logListEl) {
     else if (reason === "power-off") radio(`Volume reached 0 — radio powered OFF.`);
   });
   bus.on(EVENTS.RADIO_NOTICE, ({ message }) => radio(message));
+  bus.on(EVENTS.RADIO_CHANNEL_CHANGED, ({ line1, line2 }) => radio(`Channel changed → ${line1} / ${line2}.`));
+  bus.on(EVENTS.RADIO_MUTE_CHANGED, ({ muted }) => radio(muted ? "Muted (Tones Off)." : "Unmuted (Tones On)."));
 
   // ---- PTT ----
   bus.on(EVENTS.PTT_PRESSED, ({ supported }) => {
