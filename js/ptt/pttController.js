@@ -2,7 +2,6 @@ import { bus } from "../core/eventBus.js";
 import { EVENTS } from "../core/events.js";
 import { PTT_TIMING } from "../config/config.js";
 import { playTone } from "../core/beep.js";
-import { lockController } from "../radio/lockController.js";
 
 export const SUPPORTS_RECORDING =
   !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) &&
@@ -113,11 +112,9 @@ export function createPTTController(el) {
     if (state.phase !== "idle") return; // busy with a previous transmission
     evt.preventDefault();
 
-    if (lockController.isLocked()) {
-      lockController.blockedBeep("pttButton");
-      return;
-    }
-
+    // PTT always works, even while locked — same as the volume/channel
+    // knobs and the A/B/C switch (see radio/lockController.js and
+    // LOCK_EXEMPT_IDS in config.js). Locking only blocks "settings" buttons.
     try {
       el.setPointerCapture(evt.pointerId);
     } catch (e) {

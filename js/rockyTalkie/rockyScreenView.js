@@ -26,7 +26,10 @@ export function initRockyScreenView(refs) {
     powerText.textContent = power === "on" ? "On" : "Off";
     if (power === "off") {
       clearTimeout(batteryTimer);
-      screens.forEach((s) => s.battery.classList.remove("visible"));
+      screens.forEach((s) => {
+        s.battery.classList.remove("visible");
+        if (s.privacyCodeBadge) s.privacyCodeBadge.classList.remove("battery-showing");
+      });
     }
   });
 
@@ -48,14 +51,23 @@ export function initRockyScreenView(refs) {
     volumeNumber.textContent = `${volume}/${ROCKY_CONFIG.volumeMax}`;
   });
 
+  // The battery-percent overlay and the privacy-code badge occupy the same
+  // top-right corner of the screen (see the reference photo: the real
+  // radio shows only the battery reading there, not the code, while it's
+  // up) — hide the badge for as long as the overlay is visible so they
+  // don't visually collide, then let it reappear once the overlay fades.
   bus.on(EVENTS.ROCKY_BATTERY_CHECK, ({ percent }) => {
     screens.forEach((s) => {
       s.battery.textContent = `${percent}%`;
       s.battery.classList.add("visible");
+      if (s.privacyCodeBadge) s.privacyCodeBadge.classList.add("battery-showing");
     });
     clearTimeout(batteryTimer);
     batteryTimer = setTimeout(() => {
-      screens.forEach((s) => s.battery.classList.remove("visible"));
+      screens.forEach((s) => {
+        s.battery.classList.remove("visible");
+        if (s.privacyCodeBadge) s.privacyCodeBadge.classList.remove("battery-showing");
+      });
     }, ROCKY_CONFIG.batteryCheckDurationMs);
   });
 

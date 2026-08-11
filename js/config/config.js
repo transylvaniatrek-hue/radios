@@ -129,9 +129,11 @@ export const SPECIAL_IDS = new Set([
 ]);
 
 // The knobs and switches that stay usable even when the radio is locked —
-// everything else beeps instead of acting (see radio/lockController.js).
-// Includes both the front- and top-view hotspot ids for each physical
-// control.
+// everything else (anything that changes a *setting*) beeps instead of
+// acting (see radio/lockController.js). Includes both the front- and
+// top-view hotspot ids for each physical control. PTT is exempt too, but
+// isn't listed here — it has its own dedicated controller
+// (ptt/pttController.js) rather than going through this generic list.
 export const LOCK_EXEMPT_IDS = new Set([
   "onOffVolumeClockwise",
   "onOffVolumeCounterClockwise",

@@ -181,20 +181,25 @@ it probably belongs in a controller instead.
 
 ## The lock system
 
-`radio/lockController.js` owns a single `locked` boolean. Every controller
-that performs a button-press action checks it before acting:
+`radio/lockController.js` owns a single `locked` boolean. Locking only
+blocks controls that change a *setting* — every controller that performs
+that kind of button-press action checks it before acting:
 
-- `homeScreenController` (keypad, mute), `scanController` (orange button),
-  `pttController` (PTT) each call `lockController.isLocked()` and, if
-  true, call `lockController.blockedBeep(id)` instead of doing anything —
-  that plays the locked-beep tone (`core/beep.js`) and emits
-  `radio:locked-input` for the log.
+- `homeScreenController` (keypad, mute), `scanController` (orange button)
+  each call `lockController.isLocked()` and, if true, call
+  `lockController.blockedBeep(id)` instead of doing anything — that plays
+  the locked-beep tone (`core/beep.js`) and emits `radio:locked-input` for
+  the log.
 - `ui/hotspotHighlight.js` (every generic button with no dedicated
-  controller — keypad's siblings like nav/home/data/side buttons/etc.)
-  does the same check, **except** for ids in `LOCK_EXEMPT_IDS`
-  (`config.js`) — the channel knob and A/B/C switch, which keep working.
-- `radio/volumeKnobInput.js` never checks lock at all — the volume knob
-  always works, per spec ("locking allows the knobs to work").
+  controller — keypad's siblings like nav/home/data buttons/etc.) does the
+  same check, **except** for ids in `LOCK_EXEMPT_IDS` (`config.js`) — the
+  channel knob and A/B/C switch, which keep working.
+- `radio/volumeKnobInput.js` and `ptt/pttController.js` never check lock at
+  all — volume and PTT always work regardless of lock state, per spec
+  ("locking allows the knobs to work" — PTT and volume aren't "settings").
+  Rocky Talkie's volume/PTT input modules follow the same rule (see
+  `rockyState.js`'s `increaseVolume`/`decreaseVolume`/PTT — none of them
+  check `locked`).
 
 To add a new lockable button: give it its own controller (or fold it into
 the generic system) and add the same `if (lockController.isLocked()) {
