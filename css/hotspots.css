@@ -214,6 +214,20 @@
   box-shadow: 0 0 8px #ff3b30;
 }
 
+.radio-direct-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.radio-direct-dot.on {
+  background: #29b6f6;
+  box-shadow: 0 0 8px #29b6f6;
+}
+
 .volume-row {
   display: flex;
   align-items: center;
@@ -239,38 +253,48 @@
 }
 
 /* ---- Rocky Talkie hotspots ----
-   rocky.svg's hotspots are each a <g id="..."> wrapping two paths (a
+   Most of rocky.svg's hotspots are a <g id="..."> wrapping two paths (a
    filled icon shape + an outline), traced from the reference photos —
    structurally different from the front/top views' single-shape hotspots.
-   Rather than fight the SVG's own baked-in .rocky-cls-1 fill on two
-   separate children, both paths just say `fill: currentColor` and every
-   state below sets `color` once on the parent <g> — one property, one
-   place, and it naturally cascades to both children. */
-#InteractiveElementsRocky > g {
+   A couple (the split Channel Flipper halves) are bare <polyline>s
+   instead. Rather than fight the SVG's own baked-in .rocky-cls-1/2 fill on
+   each variant separately, every hotspot's paintable part just says
+   `fill: currentColor` (bare shapes also get `stroke: currentColor`,
+   since they were originally both filled *and* outlined) and every state
+   below sets `color` once on the direct hotspot child — one property, one
+   place, applies the same way regardless of which shape it is. */
+#InteractiveElementsRocky > * {
   cursor: pointer;
   color: rgba(255, 255, 255, 0.001);
   transition: color 0.15s ease, filter 0.15s ease;
 }
 
+/* <g>-wrapped multi-path icon hotspots */
 #InteractiveElementsRocky > g .rocky-cls-1,
 #InteractiveElementsRocky > g > path:not(.rocky-cls-1) {
   fill: currentColor;
   stroke: none;
 }
 
-#InteractiveElementsRocky > g:hover,
-#InteractiveElementsRocky > g:focus {
+/* Bare single-shape hotspots (e.g. the Channel Flipper's Forward/Back) */
+#InteractiveElementsRocky > .rocky-cls-2 {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+#InteractiveElementsRocky > *:hover,
+#InteractiveElementsRocky > *:focus {
   color: var(--hover);
   outline: none;
 }
 
-#InteractiveElementsRocky > g.active {
+#InteractiveElementsRocky > *.active {
   color: var(--accent-soft);
   filter: drop-shadow(0 0 10px var(--accent-soft));
 }
 
-#InteractiveElementsRocky > g.knob-flash,
-#InteractiveElementsRocky > g.action-flash {
+#InteractiveElementsRocky > *.knob-flash,
+#InteractiveElementsRocky > *.action-flash {
   animation: rockyFlash 0.35s ease-out;
 }
 
@@ -285,19 +309,45 @@
   }
 }
 
-#InteractiveElementsRocky > g.ptt-recording {
+#InteractiveElementsRocky > *.ptt-recording {
   color: #ff3b30;
   filter: drop-shadow(0 0 12px #ff3b30);
   animation: pttPulse 0.6s ease-in-out infinite;
 }
 
-#InteractiveElementsRocky > g.ptt-processing {
+#InteractiveElementsRocky > *.ptt-processing {
   color: #9575cd;
   filter: drop-shadow(0 0 10px #9575cd);
 }
 
-#InteractiveElementsRocky > g.ptt-playing {
+#InteractiveElementsRocky > *.ptt-playing {
   color: #34c759;
   filter: drop-shadow(0 0 10px #34c759);
   animation: pttPulse 0.8s ease-in-out infinite;
+}
+
+/* ---- Guided-activity struggle hint (activities/activityView.js) ----
+   Applied to whichever control(s) the trainee should be pressing when
+   they haven't made progress on the current step in a while. Placed last
+   so it wins ties with .active/.ptt-* at equal specificity. */
+@keyframes hintPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px #ffee58);
+  }
+  50% {
+    filter: drop-shadow(0 0 22px #ffee58);
+  }
+}
+
+:is(#InteractiveElements, #InteractiveElementsTop) > *.hint-pulse {
+  fill: rgba(255, 238, 88, 0.45);
+  stroke: #ffee58;
+  stroke-width: 4;
+  animation: hintPulse 1s ease-in-out infinite;
+}
+
+#InteractiveElementsRocky > *.hint-pulse {
+  color: #ffee58;
+  animation: hintPulse 1s ease-in-out infinite;
 }

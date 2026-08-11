@@ -73,6 +73,21 @@ export function groupOf(id) {
   return GROUPS[id] || id;
 }
 
+// Hotspot ids that exist only in the top view (viperTopMap.svg) — used by
+// the activity engine's struggle-hint highlighting (activities/activityView.js)
+// to know when it needs to switch views before a highlighted control
+// becomes visible.
+export const TOP_VIEW_ONLY_IDS = new Set([
+  "screen_top",
+  "orange_top",
+  "_3_position_switch",
+  "lock_switch",
+  "on_off_volume_clockwise",
+  "on_off_volume_counterclockwise",
+  "_16_position_clockwise",
+  "_16_position_counterclockwise",
+]);
+
 export function labelFor(id) {
   return BUTTON_LABELS[id] || id;
 }
@@ -84,6 +99,16 @@ export const SPECIAL_IDS = new Set([
   "onOffVolumeClockwise",
   "onOffVolumeCounterClockwise",
   "radioScreen",
+  // Does nothing for now — excluded from the generic click-to-highlight
+  // behavior entirely (no dedicated controller either) so clicking it has
+  // no effect at all, per explicit request.
+  "topSideSellectButton",
+  // Held ≥1s to toggle Direct Mode (see radio/directModeController.js) —
+  // only usable while the current channel display contains "Viper".
+  "sideButton1",
+  // Nuisance delete: removes the currently-selected channel from scan
+  // until the radio is power-cycled (see radio/nuisanceDeleteController.js).
+  "sideButton2",
   "one",
   "two",
   "three",
@@ -137,7 +162,7 @@ export const PTT_TIMING = {
 // Human-readable status text per PTT phase, shared by every view that shows
 // PTT status (the hotspot itself, the sidebar card).
 export const PTT_PHASE_TEXT = {
-  idle: "Idle — hold the PTT button to transmit.",
+  idle: "Idle.",
   acquiring: "Acquiring signal…",
   keying: "Signal confirmed — keying up…",
   recording: "Transmitting — recording your voice.",
@@ -151,6 +176,7 @@ export const RADIO_CONFIG = {
   bootDurationMs: 2200, // how long the Motorola boot splash is shown
   clockRefreshMs: 15000, // how often the home-screen clock re-reads the time
   topScreenRotateMs: 1500, // how long each line shows on the top view's single-line display
+  directModeHoldMs: 1000, // sideButton1 held this long toggles Direct Mode — see radio/directModeController.js
 };
 
 // ---- Home screen: channel select + mute ---------------------------------

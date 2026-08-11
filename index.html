@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Radio Trainer — Proof of Concept</title>
+<title>Radio Trainer</title>
 <link rel="stylesheet" href="css/base.css" />
 <link rel="stylesheet" href="css/hotspots.css" />
 <link rel="stylesheet" href="css/screen.css" />
@@ -81,10 +81,11 @@
 </template>
 
 <!-- Rocky Talkie's display: dark segment-display look (green glow on
-     black), a status row (lock/beep/H-L power icons), a big channel
-     number, a static privacy-code badge, and a transient battery-percent
-     overlay. See js/rockyTalkie/rockyScreenView.js and the "Look Here"
-     reference photos ("rocky on screen.jpg" / "rocky startup screen.jpg"). -->
+     black), a status row (lock/scan/beep/H-L power icons), a big channel
+     number, a live privacy-code badge (flashes while being set), and a
+     transient battery-percent overlay. See js/rockyTalkie/rockyScreenView.js
+     and the "Look Here" reference photos ("rocky on screen.jpg" / "rocky
+     startup screen.jpg"). -->
 <template id="lcdScreenRockyTemplate">
   <div class="lcd-screen lcd-screen-rocky" data-power="off">
     <div class="off-view"></div>
@@ -92,6 +93,7 @@
     <div class="home-view-rocky">
       <div class="status-row-rocky">
         <span class="icon-lock-rocky" data-role="lockIcon" title="Locked">&#128274;</span>
+        <span class="icon-scan-rocky" data-role="scanIcon" title="Scan">&#8635;</span>
         <span class="icon-beep-rocky" title="TX Beep">&#128276;</span>
         <span class="power-level-rocky" data-role="powerLevel">H</span>
       </div>
@@ -100,7 +102,10 @@
         <span class="ch-label-rocky">CH</span>
         <span class="channel-rocky" data-role="channel">1</span>
       </div>
-      <div class="code-badge-rocky">DCS<br />80</div>
+      <div class="code-badge-rocky" data-role="privacyCodeBadge">
+        <span data-role="privacyCodeType">DCS</span><br />
+        <span data-role="privacyCodeValue">80</span>
+      </div>
     </div>
   </div>
 </template>
@@ -109,7 +114,6 @@
   <header class="top">
     <div class="header-titles">
       <h1>Radio Trainer</h1>
-      <p>Proof of concept — click any control to highlight it, click again to unhighlight.</p>
     </div>
     <div class="header-selectors">
       <label class="selector-field">
@@ -250,6 +254,13 @@
   </main>
 
   <aside class="sidebar">
+    <div class="card activity-card" id="activityCard" hidden>
+      <h2>Activity</h2>
+      <div class="activity-progress" id="activityProgress"></div>
+      <p class="activity-instructions" id="activityInstructions"></p>
+      <p class="activity-hint" id="activityHint" hidden></p>
+    </div>
+
     <div class="card">
       <h2>Session</h2>
       <div class="stat-row">
@@ -274,26 +285,18 @@
         <span class="radio-lock-dot" id="radioLockDot"></span>
         <span id="radioLockText">Unlocked</span>
       </div>
-      <p class="ptt-hint">
-        Click the upper-right edge of the volume knob to power on / turn up.
-        Click the lower-left edge to turn down; reducing to 0 powers off.
-        The lock switch is only visible from the Top View — locking still
-        lets the knobs and A/B/C switch work, but every button just beeps.
-      </p>
+      <div class="radio-status-row direct-mode-status-row">
+        <span class="radio-direct-dot" id="radioDirectModeDot"></span>
+        <span id="radioDirectModeText">Repeater Mode</span>
+      </div>
     </div>
 
     <div class="card" id="pttCard">
       <h2>Push-to-Talk</h2>
       <div class="ptt-status-row">
         <span class="ptt-dot" id="pttDot"></span>
-        <span id="pttStatusText">Idle — hold the PTT button to transmit.</span>
+        <span id="pttStatusText">Idle.</span>
       </div>
-      <p class="ptt-hint">
-        Press and hold the PTT bar on the side of the radio. Wait for the
-        confirmation beep, pause briefly, then speak. Pause about half a
-        second before you release — the radio (and this simulator) clips
-        the last bit of every transmission.
-      </p>
     </div>
 
     <div class="card log-card">
@@ -316,8 +319,13 @@
     <svg id="rockyMap" class="radio-svg" width="2204.61" height="2660.02" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2204.61 2660.02">
       <defs>
         <style>
-          .rocky-cls-1 {
+          .rocky-cls-1, .rocky-cls-2 {
             fill: #fff;
+          }
+
+          .rocky-cls-2 {
+            stroke: #000;
+            stroke-miterlimit: 10;
           }
         </style>
       </defs>
@@ -327,10 +335,8 @@
         <image width="1271" height="2446" transform="translate(822.4) scale(1.09)" xlink:href="rocky full.png" />
       </g>
       <g id="InteractiveElementsRocky" class="hotspot-group">
-        <g id="channelFlipperLock">
-          <polygon class="rocky-cls-1" points="1509.75 1280.68 1627 1226.14 1650.19 1258.99 1547.44 1314.33 1509.75 1280.68"/>
-          <path d="M1626.83,1226.77l22.62,32.05-101.94,54.91-36.87-32.92,116.18-54.04M1627.17,1225.51l-118.32,55.03,38.52,34.39,103.55-55.77-23.75-33.65h0Z"/>
-        </g>
+        <polyline id="channelFlipperLockForward" class="rocky-cls-2" points="1535.98 1308.53 1501.3 1277.06 1619.62 1222.03 1649.73 1249.59"/>
+        <polyline id="channelFlipperLockBack" class="rocky-cls-2" points="1649.73 1249.59 1684.28 1281.19 1575.59 1344.48 1535.98 1308.53"/>
         <g id="setDualChannel_TransmitOnChannelB">
           <path class="rocky-cls-1" d="M1298.31,1754.13c-2.61,0-5.16-.56-7.57-1.67l-41.82-19.2c-11.26-5.17-17.97-16.92-16.7-29.24l1.84-17.88c.97-9.37,8.79-16.43,18.21-16.43,2.82,0,5.55.65,8.12,1.93l44.75,22.22c9.6,4.77,15.1,15.11,13.68,25.73l-2.5,18.76c-1.2,9-8.94,15.78-18.01,15.78Z"/>
           <path d="M1252.27,1670.21h0c2.74,0,5.39.63,7.9,1.87l44.75,22.22c9.41,4.67,14.8,14.8,13.41,25.22l-2.5,18.76c-1.17,8.75-8.7,15.35-17.52,15.35-2.54,0-5.01-.55-7.36-1.62l-41.82-19.2c-11.06-5.08-17.66-16.63-16.41-28.74l1.84-17.88c.94-9.11,8.55-15.98,17.71-15.98M1252.27,1669.21c-9.2,0-17.67,6.86-18.71,16.88l-1.84,17.88c-1.29,12.53,5.54,24.49,16.99,29.75l41.82,19.2c2.55,1.17,5.2,1.72,7.78,1.72,8.97,0,17.22-6.55,18.51-16.21l2.5-18.76c1.44-10.83-4.17-21.38-13.95-26.24l-44.75-22.22c-2.72-1.35-5.57-1.98-8.34-1.98h0Z"/>
@@ -393,6 +399,13 @@
   </main>
 
   <aside class="sidebar">
+    <div class="card activity-card" id="rockyActivityCard" hidden>
+      <h2>Activity</h2>
+      <div class="activity-progress" id="rockyActivityProgress"></div>
+      <p class="activity-instructions" id="rockyActivityInstructions"></p>
+      <p class="activity-hint" id="rockyActivityHint" hidden></p>
+    </div>
+
     <div class="card">
       <h2>Session</h2>
       <div class="stat-row">
@@ -417,24 +430,14 @@
         <span class="radio-lock-dot" id="rockyLockDot"></span>
         <span id="rockyLockText">Unlocked</span>
       </div>
-      <p class="ptt-hint">
-        Tap the Power button to check battery %; hold it 2s to turn on/off.
-        Tap the Channel Flipper to change channels; hold it 2s to lock/unlock.
-        Locked still allows volume, A/B, and PTT — everything else beeps.
-      </p>
     </div>
 
     <div class="card" id="rockyPttCard">
       <h2>Push-to-Talk</h2>
       <div class="ptt-status-row">
         <span class="ptt-dot" id="rockyPttDot"></span>
-        <span id="rockyPttStatusText">Idle — press either PTT button to transmit.</span>
+        <span id="rockyPttStatusText">Idle.</span>
       </div>
-      <p class="ptt-hint">
-        Press the red PTT button on the radio or the hand mic. Unlike the
-        Motorola 8000, there's no signal to wait for — transmission starts
-        immediately, with just a light trim off the very start and end.
-      </p>
     </div>
 
     <div class="card log-card">

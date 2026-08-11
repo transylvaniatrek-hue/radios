@@ -2,7 +2,7 @@
 // the way — this file should stay thin. See ARCHITECTURE.md for the
 // overall shape of the app (controllers emit events, views render them).
 import { EVENTS } from "./core/events.js";
-import { SPECIAL_IDS, LOCK_EXEMPT_IDS, labelFor as motorolaLabelFor } from "./config/config.js";
+import { SPECIAL_IDS, LOCK_EXEMPT_IDS, TOP_VIEW_ONLY_IDS, labelFor as motorolaLabelFor } from "./config/config.js";
 import { ROCKY_SPECIAL_IDS, rockyLabelFor } from "./config/rockyConfig.js";
 import { initTooltip } from "./ui/tooltip.js";
 import { initActivityLog } from "./ui/activityLog.js";
@@ -16,6 +16,8 @@ import { initHomeScreenInput } from "./radio/homeScreenInput.js";
 import { initScanInput } from "./radio/scanInput.js";
 import { initLockInput } from "./radio/lockInput.js";
 import { lockController } from "./radio/lockController.js";
+import { initDirectModeInput } from "./radio/directModeInput.js";
+import { initNuisanceDeleteInput } from "./radio/nuisanceDeleteInput.js";
 import { createPTTController, primeMicPermission } from "./ptt/pttController.js";
 import { initPTTView } from "./ptt/pttView.js";
 import { initRockyScreenView } from "./rockyTalkie/rockyScreenView.js";
@@ -27,6 +29,11 @@ import { initRockyPttInput } from "./rockyTalkie/rockyPttInput.js";
 import { initRockyPttView } from "./rockyTalkie/rockyPttView.js";
 import { createRockyPttController } from "./rockyTalkie/rockyPttController.js";
 import { initRockySkewOverlay } from "./rockyTalkie/rockySkewOverlay.js";
+import { rockyState } from "./rockyTalkie/rockyState.js";
+import { initActivityEngine } from "./activities/activityEngine.js";
+import { initActivityView } from "./activities/activityView.js";
+import { MOTOROLA_ACTIVITIES } from "./activities/motorolaActivities.js";
+import { ROCKY_ACTIVITIES } from "./activities/rockyActivities.js";
 
 function labelFor(id) {
   const fromMotorola = motorolaLabelFor(id);
@@ -101,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
     radioPowerText: document.getElementById("radioPowerText"),
     radioLockDot: document.getElementById("radioLockDot"),
     radioLockText: document.getElementById("radioLockText"),
+    radioDirectModeDot: document.getElementById("radioDirectModeDot"),
+    radioDirectModeText: document.getElementById("radioDirectModeText"),
     volumeBarsSidebar: document.getElementById("volumeBarsSidebar"),
     volumeNumber: document.getElementById("volumeNumber"),
   });
@@ -123,6 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initLockInput({
     lockEls: [document.getElementById("lock_switch")],
   });
+
+  initDirectModeInput({ el: document.getElementById("sideButton1") });
+  initNuisanceDeleteInput({ el: document.getElementById("sideButton2") });
 
   initHomeScreenInput({
     keypadEls: {
@@ -159,8 +171,11 @@ document.addEventListener("DOMContentLoaded", () => {
     resetBtn: document.getElementById("rockyResetBtn"),
     toggledEvent: EVENTS.ROCKY_HOTSPOT_TOGGLED,
     resetEvent: EVENTS.ROCKY_HOTSPOT_RESET,
-    // No guard: every remaining generic hotspot here (A/B channel watch)
-    // stays usable even while locked, per the manual.
+    // Not lock-blocked — the A/B button stays usable while locked, per the
+    // manual. It's still subject to the "press any button" modal rule
+    // though: pressing it while scanning/setting a privacy code ends that
+    // mode instead of toggling A/B.
+    guard: () => rockyState.consumeModalPress(),
   });
 
   const rockyScreens = [
@@ -185,7 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initRockyPowerInput({ powerEl: document.getElementById("power") });
-  initRockyChannelInput({ flipperEl: document.getElementById("channelFlipperLock") });
+  initRockyChannelInput({
+    forwardEl: document.getElementById("channelFlipperLockForward"),
+    backEl: document.getElementById("channelFlipperLockBack"),
+  });
   initRockyVolumeInput({
     upEls: [document.getElementById("volumeUp"), document.getElementById("volumeUpHandset")],
     downEls: [document.getElementById("volumeDown"), document.getElementById("volumeDownHandset")],
@@ -198,5 +216,41 @@ document.addEventListener("DOMContentLoaded", () => {
     pttEls: rockyPttEls,
     dotEl: document.getElementById("rockyPttDot"),
     textEl: document.getElementById("rockyPttStatusText"),
+  });
+
+  // =====================================================================
+  // Guided activities (Lock/Unlock, Scan, Change Privacy Code, …)
+  // =====================================================================
+  initActivityEngine([...MOTOROLA_ACTIVITIES, ...ROCKY_ACTIVITIES]);
+
+  initActivityView({
+    radioId: "motorola8000",
+    cardEl: document.getElementById("activityCard"),
+    progressEl: document.getElementById("activityProgress"),
+    instructionsEl: document.getElementById("activityInstructions"),
+    hintEl: document.getElementById("activityHint"),
+    findHintEl: (id) => document.getElementById(id),
+    // Some hinted controls (e.g. the lock switch) only exist in the Top
+    // View — force-switch to whichever view actually contains them.
+    showView: (ids) => {
+      const stage = document.getElementById("radioStage");
+      if (!stage) return;
+      const anyTopOnly = ids.some((id) => TOP_VIEW_ONLY_IDS.has(id));
+      const anyFrontVisible = ids.some((id) => !TOP_VIEW_ONLY_IDS.has(id));
+      if (anyTopOnly && !anyFrontVisible && stage.dataset.view !== "top") {
+        document.getElementById("viewToggleTop")?.click();
+      } else if (!anyTopOnly && anyFrontVisible && stage.dataset.view !== "front") {
+        document.getElementById("viewToggleFront")?.click();
+      }
+    },
+  });
+
+  initActivityView({
+    radioId: "rockyTalkie",
+    cardEl: document.getElementById("rockyActivityCard"),
+    progressEl: document.getElementById("rockyActivityProgress"),
+    instructionsEl: document.getElementById("rockyActivityInstructions"),
+    hintEl: document.getElementById("rockyActivityHint"),
+    findHintEl: (id) => document.getElementById(id),
   });
 });

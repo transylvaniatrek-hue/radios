@@ -2,7 +2,7 @@ import { bus } from "../core/eventBus.js";
 import { EVENTS } from "../core/events.js";
 
 const PHASE_TEXT = {
-  idle: "Idle — press either PTT button to transmit.",
+  idle: "Idle.",
   recording: "Transmitting — recording your voice.",
   processing: "Processing transmission…",
   playing: "Playing back your transmission…",

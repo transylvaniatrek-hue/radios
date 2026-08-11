@@ -28,12 +28,23 @@ export function initRockyActivityLog(logListEl) {
   });
 
   bus.on(EVENTS.ROCKY_POWER_CHANGED, ({ power }) => radio(power === "on" ? "Radio powered ON." : "Radio powered OFF."));
-  bus.on(EVENTS.ROCKY_CHANNEL_CHANGED, ({ channel, highPower }) =>
-    radio(`Channel ${channel} (${highPower ? "High" : "Low"} power).`)
-  );
+  bus.on(EVENTS.ROCKY_CHANNEL_CHANGED, ({ channel, highPower, reason }) => {
+    if (reason === "scan") return; // avoid log spam while cycling — see ROCKY_SCAN_ACTIVITY/ROCKY_SCAN_CHANGED instead
+    radio(`Channel ${channel} (${highPower ? "High" : "Low"} power).`);
+  });
   bus.on(EVENTS.ROCKY_LOCK_CHANGED, ({ locked }) => radio(locked ? "Radio locked." : "Radio unlocked."));
-  bus.on(EVENTS.ROCKY_LOCKED_INPUT, ({ id }) => radio(`${id === "channelFlipperLock" ? "Channel Flipper" : id} pressed while locked — beep, no action.`));
+  bus.on(EVENTS.ROCKY_LOCKED_INPUT, ({ id }) => radio(`${rockyLabelFor(id)} pressed while locked — beep, no action.`));
   bus.on(EVENTS.ROCKY_NOTICE, ({ message }) => radio(message));
+
+  bus.on(EVENTS.ROCKY_SCAN_CHANGED, ({ scanning }) => radio(scanning ? "Scan started." : "Scan stopped."));
+  bus.on(EVENTS.ROCKY_SCAN_ACTIVITY, ({ channel }) => radio(`Activity detected on channel ${channel} — pausing scan.`));
+
+  bus.on(EVENTS.ROCKY_PRIVACY_CODE_MODE_CHANGED, ({ active }) => {
+    if (active) radio("Setting privacy code — use the Channel Flipper to choose, press any button to save.");
+  });
+  bus.on(EVENTS.ROCKY_PRIVACY_CODE_CHANGED, ({ code, type, confirmed }) => {
+    if (confirmed) radio(`Privacy code set: ${type} ${code}.`);
+  });
   bus.on(EVENTS.ROCKY_BATTERY_CHECK, ({ percent }) => radio(`Battery: ${percent}%.`));
   bus.on(EVENTS.ROCKY_VOLUME_CHANGED, ({ volume, max, reason }) => {
     if (reason === "up") radio(`Volume up → ${volume}/${max}.`);
@@ -58,4 +69,14 @@ export function initRockyActivityLog(logListEl) {
   bus.on(EVENTS.APP_ACTIVITY_CHANGED, ({ activityName }) =>
     addEntry(`${badge("on", "▣")} Activity: ${activityName} selected.`)
   );
+
+  // ---- Guided activities (see activities/activityEngine.js) ----
+  bus.on(EVENTS.ACTIVITY_STEP_CHANGED, ({ radioId, stepIndex, stepCount, instructions }) => {
+    if (radioId !== "rockyTalkie") return;
+    addEntry(`${badge("on", "▣")} Step ${stepIndex + 1}/${stepCount}: ${instructions}`);
+  });
+  bus.on(EVENTS.ACTIVITY_COMPLETED, ({ radioId, activityName }) => {
+    if (radioId !== "rockyTalkie") return;
+    addEntry(`${badge("on", "▣")} Activity complete: ${activityName}.`);
+  });
 }

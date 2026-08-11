@@ -22,7 +22,14 @@ function createScanController() {
     bus.emit(EVENTS.RADIO_SCAN_CHANGED, { scanning });
   }
 
-  return { toggleScan };
+  // Read-only check for other controllers/activities that need to know
+  // current scan state without toggling it (e.g. an activity's setup()
+  // forcing a known starting state).
+  function isScanning() {
+    return scanning;
+  }
+
+  return { toggleScan, isScanning };
 }
 
 export const scanController = createScanController();

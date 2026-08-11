@@ -72,6 +72,7 @@ export function createRockyPttController() {
 
   async function onPress() {
     if (state.phase !== "idle") return; // busy with a previous transmission
+    if (rockyState.consumeModalPress()) return; // "press any button" stops scan / confirms a privacy code
     const token = ++state.pressToken;
 
     ensureAudioCtx();

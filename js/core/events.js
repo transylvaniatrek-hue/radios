@@ -30,6 +30,12 @@ export const EVENTS = {
 
   // Scan mode — see radio/scanController.js
   RADIO_SCAN_CHANGED: "radio:scan-changed", // { scanning }
+  // Nuisance delete (sideButton2) — see radio/nuisanceDeleteController.js
+  RADIO_NUISANCE_DELETE: "radio:nuisance-delete", // { channelId, line1, line2 } — removed from scan until power-cycle
+
+  // Direct mode (sideButton1, held ≥1s) — see radio/directModeController.js.
+  // Only toggleable while the current channel display contains "Viper".
+  RADIO_DIRECT_MODE_CHANGED: "radio:direct-mode-changed", // { active }
 
   // PTT hold-to-transmit lifecycle — see ptt/pttController.js
   PTT_PHASE_CHANGED: "ptt:phase-changed", // { phase: 'idle'|'acquiring'|'keying'|'recording'|'processing'|'playing' }
@@ -64,11 +70,25 @@ export const EVENTS = {
   // Motorola 8000's views react to Rocky Talkie's state changes and vice
   // versa.
   ROCKY_POWER_CHANGED: "rocky:power-changed", // { power: 'off'|'on' }
-  ROCKY_CHANNEL_CHANGED: "rocky:channel-changed", // { channel, highPower }
+  ROCKY_CHANNEL_CHANGED: "rocky:channel-changed", // { channel, highPower, reason: 'user'|'scan' }
   ROCKY_LOCK_CHANGED: "rocky:lock-changed", // { locked }
   ROCKY_LOCKED_INPUT: "rocky:locked-input", // { id } — blocked action while locked (beep)
   ROCKY_BATTERY_CHECK: "rocky:battery-check", // { percent } — transient overlay (power-on + manual tap)
   ROCKY_NOTICE: "rocky:notice", // { message } — minor informational blurbs (e.g. "radio is off")
+
+  // Scan mode — see rockyState.js's startScan/stopScan. The Channel
+  // Flipper's forward/back hold gestures do double duty (forward: lock,
+  // back: scan); "press any button" (manual) stops scanning — see
+  // rockyState.js's consumeModalPress().
+  ROCKY_SCAN_CHANGED: "rocky:scan-changed", // { scanning }
+  ROCKY_SCAN_ACTIVITY: "rocky:scan-activity", // { channel } — simulated "activity detected", scan pauses here
+
+  // Privacy codes — see rockyState.js's enterPrivacyCodeSelect/
+  // cyclePrivacyCode/confirmPrivacyCode. Entered by holding Volume Down;
+  // the Channel Flipper's taps are repurposed to cycle the code while this
+  // mode is active; "press any button" (any other button) confirms it.
+  ROCKY_PRIVACY_CODE_MODE_CHANGED: "rocky:privacy-code-mode-changed", // { active } — selection mode on/off (screen flash)
+  ROCKY_PRIVACY_CODE_CHANGED: "rocky:privacy-code-changed", // { code, type, confirmed } — value updated; confirmed=true only on save
 
   ROCKY_PTT_PHASE_CHANGED: "rocky:ptt-phase-changed", // { phase: 'idle'|'recording'|'processing'|'playing' }
   ROCKY_PTT_PRESSED: "rocky:ptt-pressed", // {}
@@ -85,4 +105,16 @@ export const EVENTS = {
   // instead of Motorola 8000's — see ui/hotspotHighlight.js).
   ROCKY_HOTSPOT_TOGGLED: "rocky:hotspot-toggled", // { id, active, group }
   ROCKY_HOTSPOT_RESET: "rocky:hotspot-reset", // {}
+
+  // ---- Guided activities (Lock/Unlock, Scan, Change Privacy Code, …) ----
+  // Emitted by activities/activityEngine.js, a radio-agnostic step-based
+  // engine driven by the activity definitions in
+  // activities/motorolaActivities.js / activities/rockyActivities.js. It
+  // subscribes to the same radio/rocky events everything else here does —
+  // it doesn't need its own hardware-state events. See activities/activityView.js
+  // for how these render into each radio's sidebar Activity card.
+  ACTIVITY_STEP_CHANGED: "activity:step-changed", // { radioId, activityId, activityName, stepIndex, stepCount, instructions }
+  ACTIVITY_STRUGGLING: "activity:struggling", // { radioId, activityId, stepIndex, hintText, hintTargetIds }
+  ACTIVITY_COMPLETED: "activity:completed", // { radioId, activityId, activityName }
+  ACTIVITY_ENDED: "activity:ended", // {} — no guided activity currently running (Free Play, or switched away)
 };

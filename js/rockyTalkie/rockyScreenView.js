@@ -58,4 +58,21 @@ export function initRockyScreenView(refs) {
       screens.forEach((s) => s.battery.classList.remove("visible"));
     }, ROCKY_CONFIG.batteryCheckDurationMs);
   });
+
+  bus.on(EVENTS.ROCKY_PRIVACY_CODE_CHANGED, ({ code, type }) => {
+    screens.forEach((s) => {
+      s.privacyCodeType.textContent = type;
+      s.privacyCodeValue.textContent = String(code);
+    });
+  });
+
+  bus.on(EVENTS.ROCKY_PRIVACY_CODE_MODE_CHANGED, ({ active }) => {
+    screens.forEach((s) => s.privacyCodeBadge.classList.toggle("flashing", active));
+  });
+
+  bus.on(EVENTS.ROCKY_SCAN_CHANGED, ({ scanning }) => {
+    screens.forEach((s) => {
+      if (s.scanIcon) s.scanIcon.classList.toggle("scan-active", scanning);
+    });
+  });
 }

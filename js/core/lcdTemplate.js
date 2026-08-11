@@ -38,6 +38,9 @@ export function instantiateLcdScreen(hostEl, kind = "multi") {
     refs.beepIcon = node.querySelector('[data-role="beepIcon"]');
     refs.powerLevel = node.querySelector('[data-role="powerLevel"]');
     refs.battery = node.querySelector('[data-role="battery"]');
+    refs.privacyCodeType = node.querySelector('[data-role="privacyCodeType"]');
+    refs.privacyCodeValue = node.querySelector('[data-role="privacyCodeValue"]');
+    refs.privacyCodeBadge = node.querySelector('[data-role="privacyCodeBadge"]');
   } else {
     refs.timeDisplay = node.querySelector('[data-role="time"]');
     refs.line1 = node.querySelector('[data-role="line1"]');

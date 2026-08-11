@@ -50,12 +50,28 @@ export function initActivityLog(logListEl) {
   bus.on(EVENTS.RADIO_LOCK_CHANGED, ({ locked }) => radio(locked ? "Radio locked." : "Radio unlocked."));
   bus.on(EVENTS.RADIO_LOCKED_INPUT, ({ id }) => radio(`${labelFor(id)} pressed while locked — beep, no action.`));
   bus.on(EVENTS.RADIO_SCAN_CHANGED, ({ scanning }) => radio(scanning ? "Scan ON." : "Scan OFF."));
+  bus.on(EVENTS.RADIO_DIRECT_MODE_CHANGED, ({ active }) =>
+    radio(active ? "Direct Mode ON." : "Direct Mode OFF — back to Repeater Mode.")
+  );
+  bus.on(EVENTS.RADIO_NUISANCE_DELETE, ({ line1, line2 }) =>
+    radio(`Nuisance delete: ${line1} / ${line2} removed from scan until power-cycled.`)
+  );
 
   // ---- Radio/activity selection (app-level, not simulated hardware) ----
   bus.on(EVENTS.APP_RADIO_CHANGED, ({ radioName }) => addEntry(`${badge("on", "▣")} Radio: ${radioName} selected.`));
   bus.on(EVENTS.APP_ACTIVITY_CHANGED, ({ activityName }) =>
     addEntry(`${badge("on", "▣")} Activity: ${activityName} selected.`)
   );
+
+  // ---- Guided activities (see activities/activityEngine.js) ----
+  bus.on(EVENTS.ACTIVITY_STEP_CHANGED, ({ radioId, stepIndex, stepCount, instructions }) => {
+    if (radioId !== "motorola8000") return;
+    addEntry(`${badge("on", "▣")} Step ${stepIndex + 1}/${stepCount}: ${instructions}`);
+  });
+  bus.on(EVENTS.ACTIVITY_COMPLETED, ({ radioId, activityName }) => {
+    if (radioId !== "motorola8000") return;
+    addEntry(`${badge("on", "▣")} Activity complete: ${activityName}.`);
+  });
 
   // ---- PTT ----
   bus.on(EVENTS.PTT_PRESSED, ({ supported }) => {

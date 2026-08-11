@@ -14,8 +14,17 @@ import { RADIO_CONFIG, HOME_SCREEN } from "../config/config.js";
 // Note: neither view shows an on-screen volume indicator — the real radio
 // doesn't have one, so that feedback lives only in the sidebar Radio card.
 export function initScreenView(refs) {
-  const { screens, radioPowerDot, radioPowerText, radioLockDot, radioLockText, volumeBarsSidebar, volumeNumber } =
-    refs;
+  const {
+    screens,
+    radioPowerDot,
+    radioPowerText,
+    radioLockDot,
+    radioLockText,
+    radioDirectModeDot,
+    radioDirectModeText,
+    volumeBarsSidebar,
+    volumeNumber,
+  } = refs;
 
   const multiScreens = screens.filter((s) => s.kind === "multi");
   const singleScreens = screens.filter((s) => s.kind === "single");
@@ -147,5 +156,11 @@ export function initScreenView(refs) {
     screens.forEach((s) => {
       if (s.scanIcon) s.scanIcon.classList.toggle("scan-active", scanning);
     });
+  });
+
+  // ---- Direct mode (sideButton1) ----
+  bus.on(EVENTS.RADIO_DIRECT_MODE_CHANGED, ({ active }) => {
+    if (radioDirectModeDot) radioDirectModeDot.classList.toggle("on", active);
+    if (radioDirectModeText) radioDirectModeText.textContent = active ? "Direct Mode" : "Repeater Mode";
   });
 }

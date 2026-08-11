@@ -4,7 +4,7 @@
 export const ROCKY_CONFIG = {
   channelMin: 1,
   channelMax: 22,
-  defaultChannel: 1,
+  defaultChannel: 2, // matches the reference photos ("DCS 80" on channel 2)
   volumeMax: 8,
 
   powerHoldMs: 2000, // manual: hold Power 2s to turn on/off
@@ -14,9 +14,23 @@ export const ROCKY_CONFIG = {
   // Cosmetic only — this simulator doesn't model battery drain.
   simulatedBatteryPercent: 92,
 
-  // Privacy code display is static for now (Free Play doesn't yet implement
-  // setting one — see manual page "Set a Privacy Code" for the real flow).
-  defaultPrivacyCodeLabel: "DCS 80",
+  // ---- Privacy codes ----
+  // Manual: "Privacy codes 1 through 38 are CTCSS... Privacy codes 39
+  // through 121 are DCS." Entering selection mode: "Press the Volume
+  // Minus (-) button until CT or DCS flashes on the screen (about 2
+  // seconds)."
+  privacyCodeMin: 1,
+  privacyCodeMax: 121,
+  ctcssMax: 38, // codes 1-38 are CT, 39-121 are DCS
+  defaultPrivacyCode: 80, // matches the reference photos
+  privacyCodeHoldMs: 2000,
+
+  // ---- Scan mode ----
+  // Manual: cycles the first 22 channels until activity is detected, then
+  // pauses on that channel for 3s before resuming.
+  scanIntervalMs: 450, // how long each channel is shown while cycling
+  scanActivityChance: 0.18, // simulated odds of "detecting activity" each tick
+  scanPauseMs: 3000, // manual: "After 3 seconds of inactivity, it will resume scanning"
 
   // PTT: unlike Motorola 8000, there's no signal-acquire delay to wait
   // through — pressing PTT starts recording immediately. The TX beep
@@ -36,15 +50,21 @@ export function isHighPowerChannel(channel) {
   return !(channel >= 8 && channel <= 14);
 }
 
+// Manual: codes 1-38 show as "CT" (CTCSS), 39-121 show as "DCS".
+export function privacyCodeType(code) {
+  return code <= ROCKY_CONFIG.ctcssMax ? "CT" : "DCS";
+}
+
 // Friendly labels for each hotspot id in rocky.svg — tooltips, aria-labels,
 // and the (few) generic-highlight log lines.
 export const ROCKY_BUTTON_LABELS = {
-  channelFlipperLock: "Channel Flipper (tap: channel, hold: lock)",
+  channelFlipperLockForward: "Channel Flipper – Forward (tap: channel up, hold: lock)",
+  channelFlipperLockBack: "Channel Flipper – Back (tap: channel down, hold: scan)",
   setDualChannel_TransmitOnChannelB: "A/B Dual Channel Watch",
   pushToTalk: "PTT (Push-to-Talk)",
   power: "Power (tap: battery, hold: on/off)",
   volumeUp: "Volume Up",
-  volumeDown: "Volume Down",
+  volumeDown: "Volume Down (hold: set privacy code)",
   pushToTalkHandset: "PTT (Hand Mic)",
   volumeUpHandset: "Volume Up (Hand Mic)",
   volumeDownHandset: "Volume Down (Hand Mic)",
@@ -58,7 +78,8 @@ export function rockyLabelFor(id) {
 // Hotspot ids with their own dedicated controller instead of the generic
 // click-to-highlight behavior (ui/hotspotHighlight.js skips these).
 export const ROCKY_SPECIAL_IDS = new Set([
-  "channelFlipperLock",
+  "channelFlipperLockForward",
+  "channelFlipperLockBack",
   "pushToTalk",
   "power",
   "volumeUp",

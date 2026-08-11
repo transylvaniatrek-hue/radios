@@ -408,6 +408,13 @@
   opacity: 1;
 }
 
+/* .icon-scan-rocky uses the same [data-role="scanIcon"] / .scan-active
+   convention as the other radio's screens (see the generic rule earlier
+   in this file) — it's dim until scanning, then opacity:1. */
+.icon-scan-rocky {
+  display: inline-block;
+}
+
 /* Transient battery-percent overlay — replaces the status row briefly on
    power-on and whenever the Power button is tapped (not held). */
 .battery-rocky {
@@ -460,4 +467,17 @@
   line-height: 1.15;
   text-align: center;
   opacity: 0.85;
+}
+
+/* While a privacy code is being selected (manual: "until CT or DCS
+   flashes on the screen"), the badge blinks to draw attention — see
+   ROCKY_PRIVACY_CODE_MODE_CHANGED in rockyScreenView.js. */
+.code-badge-rocky.flashing {
+  animation: rockyCodeFlash 0.6s step-start infinite;
+}
+
+@keyframes rockyCodeFlash {
+  50% {
+    opacity: 0.15;
+  }
 }
