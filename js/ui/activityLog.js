@@ -51,6 +51,12 @@ export function initActivityLog(logListEl) {
   bus.on(EVENTS.RADIO_LOCKED_INPUT, ({ id }) => radio(`${labelFor(id)} pressed while locked — beep, no action.`));
   bus.on(EVENTS.RADIO_SCAN_CHANGED, ({ scanning }) => radio(scanning ? "Scan ON." : "Scan OFF."));
 
+  // ---- Radio/activity selection (app-level, not simulated hardware) ----
+  bus.on(EVENTS.APP_RADIO_CHANGED, ({ radioName }) => addEntry(`${badge("on", "▣")} Radio: ${radioName} selected.`));
+  bus.on(EVENTS.APP_ACTIVITY_CHANGED, ({ activityName }) =>
+    addEntry(`${badge("on", "▣")} Activity: ${activityName} selected.`)
+  );
+
   // ---- PTT ----
   bus.on(EVENTS.PTT_PRESSED, ({ supported }) => {
     ptt(supported ? "pressed — requesting microphone…" : "pressed (recording unsupported in this browser).");

@@ -1,7 +1,15 @@
 # Architecture
 
-How the Viper 8000 Radio Trainer is put together, and how to extend it —
-particularly for the activities/levels that will build on top of this.
+How Radio Trainer is put together, and how to extend it — particularly for
+the additional radios and activities/levels that will build on top of this.
+
+The app itself is "Radio Trainer"; radios are separate, selectable things
+within it. Two are implemented: **Motorola 8000** (it's what used to be the
+whole app before the radio/activity selector existed — most of this doc
+describes it) and **Rocky Talkie**, added later as the second radio and
+the reference example for "Adding a new radio" below. Both only have a
+"Free Play" activity so far — no scenario/task system exists yet (see "Why
+an event bus").
 
 ## Running it locally
 
@@ -18,6 +26,80 @@ required `https://` or `localhost` for the same CORS-adjacent reasons, so
 this isn't a new constraint — just now it applies to the whole app, not
 just PTT.) GitHub Pages serves over HTTPS automatically, so the deployed
 site needs no special handling.
+
+## The radio/activity selector
+
+`js/config/radios.js` is the catalog: a `RADIOS` list (id, display name,
+`implemented` flag) and an `ACTIVITIES` map keyed by radio id. `Free Play`
+is every radio's default (and, until scenario activities exist, only)
+activity. `ui/radioSelector.js` reads that catalog to populate the two
+`<select>`s in the header, and does exactly two things on change — nothing
+more, since there's no activity engine yet:
+
+- **Radio changed** → show that radio's panel (`[hidden]` toggled on
+  `#motorola8000Panel` / `#rockyTalkiePanel` in `index.html`), repopulate
+  the Activity dropdown from `ACTIVITIES[radioId]`, emit `app:radio-changed`.
+- **Activity changed** → emit `app:activity-changed`. Nothing subscribes to
+  this yet beyond the activity log — it's the seam a future activity engine
+  hooks into (see "Why an event bus" below).
+
+Switching radios doesn't tear anything down — Motorola 8000's controllers
+are always wired, just hidden when its panel isn't showing, so its state
+(power, channel, lock, etc.) is exactly as you left it if you switch back.
+
+### Adding a new radio
+
+Rocky Talkie is the reference example — it was added without touching any
+Motorola 8000 code. Follow the same steps:
+
+1. Add `{ id, name, implemented: true }` to `RADIOS` and its activity list
+   to `ACTIVITIES` in `radios.js`.
+2. Build a new panel in `index.html` (`<div class="radio-panel" id="<id>Panel" hidden>`)
+   with that radio's own markup — its own SVG(s)/hotspots/`<template>`
+   screen(s), following the Rocky Talkie panel as a reference.
+3. Register the panel in `main.js`'s `initRadioSelector({ panels: {...} })`.
+4. Give it its own config (`config/<name>Config.js`), controllers, and
+   activity log under a same-named folder (`js/rockyTalkie/` is the
+   pattern — state machines, inputs, screen view, and its own
+   `init<Name>ActivityLog` all live there) and wire them in `main.js`.
+   **Use a distinct event namespace** (`rocky:*`, not `radio:*`/`ptt:*`) —
+   every radio's controllers are always wired regardless of which panel is
+   visible, so reusing Motorola 8000's event names would make its views
+   react to the new radio's state changes too. The one exception:
+   `APP_RADIO_CHANGED`/`APP_ACTIVITY_CHANGED` (app-level, not radio
+   hardware) are deliberately handled by *every* radio's activity log, so
+   whichever panel the user just switched to shows the confirmation.
+5. If a hotspot is one of two+ input surfaces for the same physical
+   control (Rocky Talkie's PTT/volume exist on both the radio body and the
+   accessory hand mic, same as Motorola 8000's front/top views), wire an
+   array of elements to one shared controller rather than duplicating
+   logic — see `rockyVolumeInput.js`/`rockyPttInput.js`.
+6. If one physical button does two different things by press duration
+   (Rocky Talkie's Power and Channel Flipper), use `core/holdOrTap.js`
+   rather than writing bespoke timer logic.
+7. `ui/hotspotHighlight.js` is radio-agnostic on purpose — call it once per
+   radio with that radio's own `hotspots`/`activeCountEl`/`resetBtn`, and
+   (if it needs one) a `guard(id)` function for lock-blocking, rather than
+   it hardcoding any one radio's lock system.
+
+Two rendering pitfalls worth knowing about before you hit them again:
+
+- **An SVG with only `viewBox` (no `width`/`height` attributes) can fail
+  to auto-size at all when it's nested inside an extra wrapper `<div>**
+  (as opposed to being a direct flex child) — some engines can't resolve
+  `width:auto;height:auto` from the intrinsic aspect ratio alone in that
+  context. Fix: give the `<svg>` explicit `width`/`height` attributes
+  matching its viewBox (see `#rockyMap`) so it has a real intrinsic size
+  regardless of nesting.
+- **`<foreignObject>` with a `transform` (needed for Rocky Talkie's skewed
+  screen) didn't reliably composite** in testing, even though the DOM/CSS
+  were verifiably correct (right position, size, color). The fix that
+  actually rendered: don't nest the screen inside the SVG at all — make it
+  a plain HTML element positioned on top via CSS `transform`, kept in sync
+  with the SVG's responsive size by a `ResizeObserver`-driven `--*-scale`
+  custom property. See `rockySkewOverlay.js` + `.rocky-onradio-screen` in
+  `screen.css` for the working pattern; reuse it rather than foreignObject
+  if a future radio's screen also needs a non-rectangular placement.
 
 ## Two views of one radio
 
@@ -155,46 +237,86 @@ treat it as the contract activities are built against.
 | Change the front LCD's look/content | `css/screen.css` + `<template id="lcdScreenTemplate">` in `index.html` |
 | Change the top LCD's look/content | `css/screen.css` (`.lcd-screen-top` rules) + `<template id="lcdScreenTopTemplate">` in `index.html` |
 | Add another copy of a screen elsewhere on the page | Add a host element in `index.html`, then one more `instantiateLcdScreen(host, kind)` call in `main.js`'s `screens` array |
-| Add a new physical control with special (non-toggle) behavior | Add its id to `SPECIAL_IDS` in `config.js`, write a controller in a new folder (mirror `ptt/` or `radio/`), emit new events in `events.js`, wire it in `main.js`. If it should be blocked while locked, add the `lockController.isLocked()` guard; if it's a knob/switch, add its id(s) to `LOCK_EXEMPT_IDS` instead |
+| Add a new physical control with special (non-toggle) behavior | Add its id to that radio's `*_SPECIAL_IDS`, write a controller in its folder, emit new events in `events.js` (own namespace!), wire it in `main.js`. If it should be blocked while locked, guard it (or, for the generic system, pass a `guard` to that radio's `initHotspotHighlight` call); if it's a knob/switch that should keep working, exempt it instead |
 | Add a brand-new activity/level system | New top-level folder (e.g. `js/activities/`) that only imports `core/eventBus.js` + `core/events.js` — it shouldn't need to import controllers directly |
+| Add a scenario activity (not just Free Play) to a radio's dropdown | `js/config/radios.js` → add to that radio's list in `ACTIVITIES` |
+| Add a new radio | See "Adding a new radio" above |
+| Tune Rocky Talkie's channel range / timing / trim | `js/config/rockyConfig.js` → `ROCKY_CONFIG` |
+| Change Rocky Talkie's screen look/content | `css/screen.css` (`.lcd-screen-rocky` rules) + `<template id="lcdScreenRockyTemplate">` in `index.html` |
 
 ## File map
 
 ```
-index.html                 Markup + both SVGs' hotspots + both <template> LCDs
+index.html                 Header (radio/activity selectors) + one <div class="radio-panel">
+                             per radio: Motorola 8000's has both SVGs' hotspots +
+                             both <template> LCDs; Rocky Talkie's has its SVG,
+                             its on-radio screen overlay (see below), and its
+                             own <template id="lcdScreenRockyTemplate">
 css/
-  base.css                 Page chrome: layout, view toggle, large-screen-column,
-                             sidebar cards, log, tooltip
-  hotspots.css             SVG control states (hover/active/PTT glow/knob flash),
-                             targets both views' hotspot groups via :is()
-  screen.css                Both LCD flavors (front: boot/home/menu-bar;
-                             top: boot/single-line/reduced icons)
+  base.css                 Page chrome: layout, header selectors, radio-panel
+                             show/hide, view toggle, large-screen-column,
+                             .rocky-radio-visual wrapper, sidebar cards, log, tooltip
+  hotspots.css             SVG control states — Motorola 8000's via :is() on two
+                             ID selectors (fill/stroke); Rocky Talkie's via
+                             `color`/currentColor on its grouped <g> hotspots
+                             (see the comment above #InteractiveElementsRocky
+                             for why those need a different technique)
+  screen.css                All three LCD flavors (front: boot/home/menu-bar;
+                             top: boot/single-line/reduced icons; rocky: segment-
+                             display look) + Rocky's on-radio overlay positioning
 js/
   main.js                   Bootstraps everything (DOM refs → controllers/views)
   core/
     eventBus.js              Minimal pub/sub
-    events.js                 Catalog of every event name + payload shape
-    beep.js                    Shared tone generator (PTT confirm beep, locked-input beep)
+    events.js                 Catalog of every event name + payload shape (both
+                                radios' namespaces)
+    beep.js                    Shared tone generator (confirm beeps, locked-input beep)
+    holdOrTap.js                Tap-vs-hold gesture helper (Rocky's Power/Channel Flipper)
+    lcdTemplate.js                Clones a named <template> LCD into a host — shared,
+                                    radio-agnostic (used by both radios)
   config/
-    config.js                 Labels, groups, special-ids, lock-exempt-ids,
-                                channel presets, timing constants
-  radio/
+    config.js                 Motorola 8000's labels, groups, special-ids,
+                                lock-exempt-ids, channel presets, timing constants
+    rockyConfig.js              Rocky Talkie's labels, special-ids, channel/power-level
+                                  logic, timing constants
+    radios.js                  Radio + per-radio activity catalog (the selector's data)
+  radio/                      Motorola 8000's controllers/views
     radioState.js             Power/volume state machine (no DOM)
     homeScreenController.js    Channel select + mute state machine (no DOM)
     lockController.js           Lock/unlock state + the shared "blocked beep" helper
     scanController.js            Scan on/off state machine (no DOM)
     screenView.js                  Drives every LCD instance + sidebar Radio/Lock card (view)
-    lcdTemplate.js                  Clones one of the two <template> LCDs into a host
     volumeKnobInput.js               Knob clicks (front+top) → radioState calls (input)
     homeScreenInput.js                Keypad/mute clicks (front only) → homeScreenController (input)
     scanInput.js                       Orange-button clicks (front+top) → scanController (input)
     lockInput.js                        Lock-switch clicks (top only) → lockController (input)
-  ptt/
+  rockyTalkie/                 Rocky Talkie's controllers/views (mirrors radio/ + ptt/ above)
+    rockyState.js              Power/channel/volume/lock state machine (no DOM)
+    rockyPttController.js       Hold-to-transmit — immediate start, light symmetric
+                                  trim, no lock-blocking (see config comments for why
+                                  this differs from Motorola 8000's PTT)
+    rockyScreenView.js           Drives both LCD instances + sidebar cards (view)
+    rockyActivityLog.js           Rocky's own log — also handles APP_RADIO_CHANGED/
+                                    APP_ACTIVITY_CHANGED, same as ui/activityLog.js
+    rockySkewOverlay.js           Keeps the skewed on-radio screen's CSS scale in
+                                    sync with the responsive SVG (see "rendering
+                                    pitfalls" above)
+    rockyPowerInput.js             Power button (tap/hold) → rockyState
+    rockyChannelInput.js            Channel Flipper (tap/hold) → rockyState
+    rockyVolumeInput.js              Volume buttons (radio+handset) → rockyState
+    rockyPttInput.js                  PTT buttons (radio+handset) → rockyPttController
+    rockyPttView.js                    PTT hotspot glow + sidebar PTT card (view)
+  ptt/                          Motorola 8000's PTT (separate from rockyTalkie/'s)
     pttController.js           Hold-to-transmit state machine (no DOM)
     pttView.js                   PTT hotspot glow + sidebar PTT card (view)
   ui/
-    tooltip.js                  Generic hover/focus tooltip (both views)
-    activityLog.js               Turns bus events into log lines
-    hotspotHighlight.js          Generic click-to-highlight controller+view (lock-aware)
+    tooltip.js                  Generic hover/focus tooltip (both radios, all views)
+    activityLog.js               Motorola 8000's log — also handles APP_RADIO_CHANGED/
+                                   APP_ACTIVITY_CHANGED (see rockyActivityLog.js above)
+    hotspotHighlight.js          Generic click-to-highlight controller+view — radio-
+                                   agnostic; called once per radio with that radio's own
+                                   hotspots/count-el/reset-btn/guard/event-names
     viewToggle.js                 Front/Top view switch (UI-only, not simulated hardware)
+    radioSelector.js               Header dropdowns: shows/hides radio panels,
+                                     populates the Activity dropdown, emits app:*-changed
 ```

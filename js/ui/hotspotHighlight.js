@@ -1,18 +1,31 @@
 import { bus } from "../core/eventBus.js";
 import { EVENTS } from "../core/events.js";
-import { groupOf, LOCK_EXEMPT_IDS } from "../config/config.js";
-import { lockController } from "../radio/lockController.js";
+import { groupOf as defaultGroupOf } from "../config/config.js";
 
 // Generic click-to-highlight behavior for every hotspot that doesn't have
-// its own dedicated controller (PTT, the volume knob, the screen). Clicking
-// toggles a persistent highlight; clicking again clears it. Paired shapes
-// (e.g. the 16-position channel knob's two hit-regions) share one logical
-// on/off state via config.GROUPS.
+// its own dedicated controller. Clicking toggles a persistent highlight;
+// clicking again clears it. Paired shapes (e.g. the 16-position channel
+// knob's two hit-regions) share one logical on/off state via a `groupOf`
+// function.
 //
-// Locking the radio blocks every hotspot here except the ones in
-// LOCK_EXEMPT_IDS (the channel knob and A/B/C switch) — those are knobs,
-// not buttons, so they keep working; everything else beeps instead.
-export function initHotspotHighlight({ hotspots, activeCountEl, resetBtn }) {
+// Radio-agnostic on purpose: this is shared infrastructure called once per
+// radio (each with its own hotspot list, count/reset elements, and event
+// names), not owned by any one radio's lock system. A radio that wants
+// locked hotspots to beep instead of act passes a `guard(id)` — return
+// true to block the action; the guard itself is responsible for any
+// feedback (beep, log entry). See main.js for how Motorola 8000 wires its
+// guard through lockController, and note Rocky Talkie passes none, since
+// its only remaining generic hotspot (A/B channel swap) stays usable even
+// while locked per its manual.
+export function initHotspotHighlight({
+  hotspots,
+  activeCountEl,
+  resetBtn,
+  groupOf = defaultGroupOf,
+  guard = null,
+  toggledEvent = EVENTS.HOTSPOT_TOGGLED,
+  resetEvent = EVENTS.HOTSPOT_RESET,
+}) {
   const activeGroups = new Set();
 
   function elementsInGroup(group) {
@@ -28,10 +41,7 @@ export function initHotspotHighlight({ hotspots, activeCountEl, resetBtn }) {
   }
 
   function activate(el) {
-    if (lockController.isLocked() && !LOCK_EXEMPT_IDS.has(el.id)) {
-      lockController.blockedBeep(el.id);
-      return;
-    }
+    if (guard && guard(el.id)) return;
     const group = groupOf(el.id);
     const nowActive = !activeGroups.has(group);
     if (nowActive) {
@@ -42,7 +52,7 @@ export function initHotspotHighlight({ hotspots, activeCountEl, resetBtn }) {
     setGroupState(group, nowActive);
     elementsInGroup(group).forEach((e) => e.setAttribute("aria-pressed", String(nowActive)));
     updateActiveCount();
-    bus.emit(EVENTS.HOTSPOT_TOGGLED, { id: el.id, active: nowActive, group });
+    bus.emit(toggledEvent, { id: el.id, active: nowActive, group });
   }
 
   hotspots.forEach((el) => {
@@ -61,7 +71,7 @@ export function initHotspotHighlight({ hotspots, activeCountEl, resetBtn }) {
     activeGroups.clear();
     hotspots.forEach((el) => el.setAttribute("aria-pressed", "false"));
     updateActiveCount();
-    bus.emit(EVENTS.HOTSPOT_RESET, {});
+    bus.emit(resetEvent, {});
   });
 
   updateActiveCount();

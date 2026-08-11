@@ -237,3 +237,67 @@
 .volume-bars-sidebar .seg.filled {
   background: var(--accent);
 }
+
+/* ---- Rocky Talkie hotspots ----
+   rocky.svg's hotspots are each a <g id="..."> wrapping two paths (a
+   filled icon shape + an outline), traced from the reference photos —
+   structurally different from the front/top views' single-shape hotspots.
+   Rather than fight the SVG's own baked-in .rocky-cls-1 fill on two
+   separate children, both paths just say `fill: currentColor` and every
+   state below sets `color` once on the parent <g> — one property, one
+   place, and it naturally cascades to both children. */
+#InteractiveElementsRocky > g {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.001);
+  transition: color 0.15s ease, filter 0.15s ease;
+}
+
+#InteractiveElementsRocky > g .rocky-cls-1,
+#InteractiveElementsRocky > g > path:not(.rocky-cls-1) {
+  fill: currentColor;
+  stroke: none;
+}
+
+#InteractiveElementsRocky > g:hover,
+#InteractiveElementsRocky > g:focus {
+  color: var(--hover);
+  outline: none;
+}
+
+#InteractiveElementsRocky > g.active {
+  color: var(--accent-soft);
+  filter: drop-shadow(0 0 10px var(--accent-soft));
+}
+
+#InteractiveElementsRocky > g.knob-flash,
+#InteractiveElementsRocky > g.action-flash {
+  animation: rockyFlash 0.35s ease-out;
+}
+
+@keyframes rockyFlash {
+  0% {
+    color: #ffb300;
+    filter: drop-shadow(0 0 10px #ffb300);
+  }
+  100% {
+    color: rgba(255, 255, 255, 0.001);
+    filter: none;
+  }
+}
+
+#InteractiveElementsRocky > g.ptt-recording {
+  color: #ff3b30;
+  filter: drop-shadow(0 0 12px #ff3b30);
+  animation: pttPulse 0.6s ease-in-out infinite;
+}
+
+#InteractiveElementsRocky > g.ptt-processing {
+  color: #9575cd;
+  filter: drop-shadow(0 0 10px #9575cd);
+}
+
+#InteractiveElementsRocky > g.ptt-playing {
+  color: #34c759;
+  filter: drop-shadow(0 0 10px #34c759);
+  animation: pttPulse 0.8s ease-in-out infinite;
+}

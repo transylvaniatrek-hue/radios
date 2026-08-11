@@ -28,37 +28,114 @@ body {
 }
 
 .app {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
-  align-items: start;
 }
 
 header.top {
-  grid-column: 1 / -1;
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
   border-bottom: 1px solid var(--panel-border);
   padding-bottom: 16px;
   margin-bottom: 4px;
 }
 
-header.top h1 {
+.header-titles h1 {
   font-size: 1.4rem;
   margin: 0;
   letter-spacing: 0.02em;
 }
 
-header.top p {
-  margin: 0;
+.header-titles p {
+  margin: 4px 0 0 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+/* ---- Header: Radio / Activity dropdowns ---- */
+.header-selectors {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.selector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+}
+
+.selector-field select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.9rem;
+  min-width: 170px;
+  cursor: pointer;
+}
+
+.selector-field select:focus {
+  outline: 2px solid var(--hover-stroke);
+  outline-offset: 1px;
+}
+
+/* ---- Radio panels ----
+   Only one radio's panel is shown at a time (ui/radioSelector.js toggles
+   the [hidden] attribute). Every radio panel gets the same two-column
+   radio-stage/sidebar layout — this used to be applied at the .app level
+   before there was more than one radio; a not-yet-built radio can still
+   use .coming-soon instead (see "Adding a new radio" in ARCHITECTURE.md). */
+.radio-panel-host {
+  display: block;
+}
+
+.radio-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.radio-panel[hidden] {
+  display: none;
+}
+
+.coming-soon {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.coming-soon h2 {
+  color: var(--text);
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+}
+
+.coming-soon p {
+  margin: 0 auto;
+  max-width: 480px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .radio-stage {
@@ -71,6 +148,17 @@ header.top p {
   align-items: center;
   justify-content: center;
   gap: 24px;
+}
+
+/* Wraps Rocky Talkie's SVG together with its on-radio screen overlay (a
+   plain HTML element, not an SVG foreignObject — see the comment by
+   #rockyScreenHost in index.html) so the overlay can be positioned
+   absolutely on top of it. */
+.rocky-radio-visual {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0; /* avoid inline-block baseline gap under the svg */
 }
 
 .radio-stage .radio-svg {
@@ -158,6 +246,13 @@ header.top p {
   max-width: none;
 }
 
+/* Rocky Talkie's screen is a small, wide rectangle too (see rocky.svg's
+   screenDisplay polygon, ~414 × 212 once un-skewed). */
+.large-screen-bezel-rocky {
+  aspect-ratio: 414 / 212;
+  max-width: none;
+}
+
 .large-screen-bezel .lcd-screen-host {
   border-radius: 4px;
   overflow: hidden;
@@ -211,7 +306,7 @@ header.top p {
   font-size: 0.85rem;
 }
 
-#resetBtn {
+.reset-btn {
   margin-top: 12px;
   width: 100%;
   padding: 10px 14px;
@@ -224,7 +319,7 @@ header.top p {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-#resetBtn:hover {
+.reset-btn:hover {
   background: rgba(255, 138, 0, 0.12);
   border-color: var(--accent);
 }
@@ -237,7 +332,7 @@ header.top p {
   flex-direction: column;
 }
 
-#logList {
+.log-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -248,7 +343,7 @@ header.top p {
   gap: 6px;
 }
 
-#logList li {
+.log-list li {
   font-size: 0.85rem;
   padding: 6px 8px;
   border-radius: 6px;
@@ -300,7 +395,7 @@ header.top p {
 }
 
 @media (max-width: 980px) {
-  .app {
+  .radio-panel {
     grid-template-columns: 1fr;
   }
   .sidebar {

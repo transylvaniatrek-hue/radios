@@ -328,3 +328,136 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+/* =========================================================
+   Rocky Talkie's display: a small monochrome segment LCD —
+   black background, glowing green digits. See the "Look Here"
+   reference photos ("rocky on screen.jpg" / "rocky startup
+   screen.jpg") and js/rockyTalkie/rockyScreenView.js.
+   ========================================================= */
+.lcd-screen-rocky {
+  background: #05100a;
+}
+
+/* The on-radio overlay itself: fixed size in SVG viewBox units (matching
+   the screenDisplay polygon's ~414 × 212 un-skewed footprint), skewed and
+   scaled into place via CSS transform. --rocky-scale is kept in sync with
+   the SVG's actual rendered size by js/rockyTalkie/rockySkewOverlay.js —
+   without it this would only be correctly sized at the SVG's native
+   2204.61px-wide dimensions. transform-origin stays at the top-left
+   corner (the anchor point baked into the matrix's translation) so
+   scaling doesn't drift the position. */
+.rocky-onradio-screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 414px;
+  height: 212px;
+  transform-origin: 0 0;
+  transform: scale(var(--rocky-scale, 1)) matrix(0.90814, -0.41761, 0.1033, 0.99434, 1544.48, 1741.01);
+  pointer-events: none; /* clicks pass through to the screenDisplay hotspot underneath */
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.lcd-screen-rocky .off-view,
+.lcd-screen-rocky .home-view-rocky {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.lcd-screen-rocky[data-power="off"] .off-view {
+  display: block;
+  background: #000;
+}
+
+.lcd-screen-rocky[data-power="on"] .home-view-rocky {
+  display: flex;
+}
+
+.home-view-rocky {
+  flex-direction: column;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  color: #2bff88;
+  text-shadow: 0 0 6px rgba(43, 255, 136, 0.85), 0 0 14px rgba(43, 255, 136, 0.4);
+}
+
+.status-row-rocky {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 24%;
+  flex: none;
+  font-size: 1em;
+}
+
+.power-level-rocky {
+  font-weight: bold;
+  margin-left: auto;
+  font-size: 1.1em;
+}
+
+.icon-lock-rocky {
+  opacity: 0.25;
+  transition: opacity 0.15s ease;
+}
+
+.icon-lock-rocky.active-icon {
+  opacity: 1;
+}
+
+/* Transient battery-percent overlay — replaces the status row briefly on
+   power-on and whenever the Power button is tapped (not held). */
+.battery-rocky {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  right: 12px;
+  height: 24%;
+  display: flex;
+  align-items: center;
+  font-size: 1.15em;
+  font-weight: bold;
+  background: #05100a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.battery-rocky.visible {
+  opacity: 1;
+}
+
+.channel-row-rocky {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 0;
+}
+
+.ch-label-rocky {
+  font-size: 1em;
+  font-weight: bold;
+  align-self: flex-end;
+  margin-bottom: 0.3em;
+}
+
+.channel-rocky {
+  font-size: 3.4em;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.code-badge-rocky {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1.15;
+  text-align: center;
+  opacity: 0.85;
+}
